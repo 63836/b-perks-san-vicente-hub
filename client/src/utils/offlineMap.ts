@@ -144,10 +144,10 @@ class OfflineMapManager {
 
 export const offlineMapManager = new OfflineMapManager();
 
-// Barangay San Vicente, Baguio City bounds for caching
+// Barangay San Vicente, Baguio City bounds for caching (16.3954, 120.5968)
 export const BARANGAY_BOUNDS = {
-  north: 16.4150,
-  south: 16.4080,
-  east: 120.5980,
-  west: 120.5910
+  north: 16.3985,
+  south: 16.3920,
+  east: 120.6000,
+  west: 120.5935
 };

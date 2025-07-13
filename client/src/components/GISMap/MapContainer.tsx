@@ -61,171 +61,187 @@ interface MapData {
   }>;
 }
 
-// Sample data for Barangay San Vicente, Baguio City
+// Sample data for Barangay San Vicente, Baguio City (16.3954, 120.5968)
 const sampleMapData: MapData = {
   reports: [
     {
       id: '1',
-      lat: 16.4125,
-      lng: 120.5950,
+      lat: 16.3940,
+      lng: 120.5980,
       title: 'Broken Street Light',
-      description: 'Street light not working on Upper Gen. Luna Road',
+      description: 'Street light not working on residential area',
       status: 'pending'
     },
     {
       id: '2',
-      lat: 16.4105,
-      lng: 120.5945,
+      lat: 16.3965,
+      lng: 120.5955,
       title: 'Pothole',
-      description: 'Large pothole on Kayang Street',
+      description: 'Large pothole causing traffic issues',
       status: 'in-progress'
     },
     {
       id: '3',
-      lat: 16.4095,
-      lng: 120.5940,
+      lat: 16.3970,
+      lng: 120.5975,
       title: 'Drainage Issue',
-      description: 'Clogged drainage near Session Road area',
+      description: 'Clogged drainage causing flooding during rain',
       status: 'resolved'
+    },
+    {
+      id: '4',
+      lat: 16.3935,
+      lng: 120.5960,
+      title: 'Road Maintenance',
+      description: 'Road surface deteriorating in lower area',
+      status: 'pending'
+    },
+    {
+      id: '5',
+      lat: 16.3945,
+      lng: 120.5990,
+      title: 'Illegal Dumping',
+      description: 'Garbage dumped in vacant lot',
+      status: 'in-progress'
     }
   ],
   events: [
     {
       id: '1',
-      lat: 16.4115,
-      lng: 120.5955,
+      lat: 16.3954,
+      lng: 120.5968,
       title: 'Community Clean-up',
-      description: 'Monthly community cleaning activity at Session Road',
+      description: 'Monthly community cleaning activity at barangay center',
       date: '2024-01-20'
     },
     {
       id: '2',
-      lat: 16.4100,
-      lng: 120.5935,
+      lat: 16.3960,
+      lng: 120.5965,
       title: 'Health Fair',
-      description: 'Free health checkups at Burnham Park area',
+      description: 'Free health checkups at community center',
       date: '2024-01-28'
     },
     {
       id: '3',
-      lat: 16.4130,
-      lng: 120.5960,
+      lat: 16.3950,
+      lng: 120.5970,
       title: 'Tree Planting',
-      description: 'Environmental activity at Upper Gen. Luna',
+      description: 'Environmental activity at community park',
       date: '2024-02-05'
     }
   ],
   safetyAreas: [
     {
       id: '1',
-      name: 'Session Road Commercial Area',
+      name: 'Barangay Center - Main Road',
       level: 'high',
       coordinates: [
-        [16.4110, 120.5930],
-        [16.4120, 120.5930],
-        [16.4120, 120.5950],
-        [16.4110, 120.5950]
+        [16.3950, 120.5960],
+        [16.3960, 120.5960],
+        [16.3960, 120.5975],
+        [16.3950, 120.5975]
       ]
     },
     {
       id: '2',
-      name: 'Burnham Park Area',
+      name: 'Community Center Area',
       level: 'high',
       coordinates: [
-        [16.4090, 120.5920],
-        [16.4110, 120.5920],
-        [16.4110, 120.5940],
-        [16.4090, 120.5940]
+        [16.3955, 120.5965],
+        [16.3965, 120.5965],
+        [16.3965, 120.5980],
+        [16.3955, 120.5980]
       ]
     },
     {
       id: '3',
-      name: 'Upper Gen. Luna Residential',
+      name: 'Upper Residential Area',
       level: 'medium',
       coordinates: [
-        [16.4120, 120.5940],
-        [16.4140, 120.5940],
-        [16.4140, 120.5970],
-        [16.4120, 120.5970]
+        [16.3965, 120.5950],
+        [16.3975, 120.5950],
+        [16.3975, 120.5970],
+        [16.3965, 120.5970]
       ]
     }
   ],
   puroks: [
     {
       id: '1',
-      name: 'Purok 1 - Session Road Area',
+      name: 'Purok 1 - Barangay Center',
       safetyLevel: 'high',
       coordinates: [
-        [16.4100, 120.5920],
-        [16.4115, 120.5920],
-        [16.4115, 120.5940],
-        [16.4100, 120.5940]
+        [16.3950, 120.5960],
+        [16.3960, 120.5960],
+        [16.3960, 120.5975],
+        [16.3950, 120.5975]
       ]
     },
     {
       id: '2',
-      name: 'Purok 2 - Central Business District',
+      name: 'Purok 2 - Main Residential',
       safetyLevel: 'high',
       coordinates: [
-        [16.4115, 120.5920],
-        [16.4130, 120.5920],
-        [16.4130, 120.5940],
-        [16.4115, 120.5940]
+        [16.3960, 120.5960],
+        [16.3970, 120.5960],
+        [16.3970, 120.5975],
+        [16.3960, 120.5975]
       ]
     },
     {
       id: '3',
-      name: 'Purok 3 - Upper Gen. Luna',
+      name: 'Purok 3 - Upper Area',
       safetyLevel: 'medium',
       coordinates: [
-        [16.4100, 120.5940],
-        [16.4115, 120.5940],
-        [16.4115, 120.5960],
-        [16.4100, 120.5960]
+        [16.3965, 120.5945],
+        [16.3975, 120.5945],
+        [16.3975, 120.5960],
+        [16.3965, 120.5960]
       ]
     },
     {
       id: '4',
-      name: 'Purok 4 - Residential Hills',
+      name: 'Purok 4 - Eastern Side',
       safetyLevel: 'medium',
       coordinates: [
-        [16.4115, 120.5940],
-        [16.4130, 120.5940],
-        [16.4130, 120.5960],
-        [16.4115, 120.5960]
+        [16.3950, 120.5975],
+        [16.3960, 120.5975],
+        [16.3960, 120.5990],
+        [16.3950, 120.5990]
       ]
     },
     {
       id: '5',
-      name: 'Purok 5 - Kayang Extension',
+      name: 'Purok 5 - Lower West (Multiple Reports)',
       safetyLevel: 'low',
       coordinates: [
-        [16.4085, 120.5920],
-        [16.4100, 120.5920],
-        [16.4100, 120.5945],
-        [16.4085, 120.5945]
+        [16.3930, 120.5950],
+        [16.3945, 120.5950],
+        [16.3945, 120.5970],
+        [16.3930, 120.5970]
       ]
     },
     {
       id: '6',
-      name: 'Purok 6 - Lower Area',
+      name: 'Purok 6 - Eastern Problems Area',
       safetyLevel: 'low',
       coordinates: [
-        [16.4085, 120.5945],
-        [16.4100, 120.5945],
-        [16.4100, 120.5970],
-        [16.4085, 120.5970]
+        [16.3940, 120.5975],
+        [16.3955, 120.5975],
+        [16.3955, 120.5995],
+        [16.3940, 120.5995]
       ]
     },
     {
       id: '7',
-      name: 'Purok 7 - Outer Boundary',
+      name: 'Purok 7 - Northern Border',
       safetyLevel: 'medium',
       coordinates: [
-        [16.4130, 120.5920],
-        [16.4145, 120.5920],
-        [16.4145, 120.5950],
-        [16.4130, 120.5950]
+        [16.3970, 120.5950],
+        [16.3980, 120.5950],
+        [16.3980, 120.5970],
+        [16.3970, 120.5970]
       ]
     }
   ]
@@ -281,14 +297,14 @@ const LocationMarker: React.FC = () => {
         },
         () => {
           // Fallback to Barangay San Vicente center
-          const fallbackPosition: [number, number] = [16.4115, 120.5940];
+          const fallbackPosition: [number, number] = [16.3954, 120.5968];
           setPosition(fallbackPosition);
           map.setView(fallbackPosition, 16);
         }
       );
     } else {
       // Fallback for browsers without geolocation
-      const fallbackPosition: [number, number] = [16.4115, 120.5940];
+      const fallbackPosition: [number, number] = [16.3954, 120.5968];
       setPosition(fallbackPosition);
       map.setView(fallbackPosition, 16);
     }
@@ -355,8 +371,8 @@ const GISMap: React.FC<GISMapProps> = ({ className }) => {
   return (
     <div className={`relative ${className}`}>
       <MapContainer
-        center={[16.4115, 120.5940]}
-        zoom={15}
+        center={[16.3954, 120.5968]}
+        zoom={16}
         style={{ height: '100%', width: '100%' }}
         className="rounded-lg"
       >
