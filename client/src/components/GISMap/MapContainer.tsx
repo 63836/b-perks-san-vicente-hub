@@ -360,7 +360,7 @@ const calculateDistance = (lat1: number, lng1: number, lat2: number, lng2: numbe
   return R * c;
 };
 
-// Function to check if reports are overlapping (within 10 meters)
+// Function to check if reports are overlapping (within 60 meters)
 const findOverlappingReports = (reports: MapData['reports']) => {
   const overlappingPairs: Array<{report1: MapData['reports'][0], report2: MapData['reports'][0]}> = [];
   
@@ -371,7 +371,7 @@ const findOverlappingReports = (reports: MapData['reports']) => {
         reports[j].lat, reports[j].lng
       );
       
-      if (distance <= 10) { // 10 meters
+      if (distance <= 60) { // 60 meters
         overlappingPairs.push({
           report1: reports[i],
           report2: reports[j]
@@ -491,18 +491,18 @@ const GISMap: React.FC<GISMapProps> = ({ className, activeLayersState = {} }) =>
         {/* Safety Level Visualization - Yellow circles around reports and red overlaps */}
         {layers.safetyAreas && (
           <>
-            {/* Yellow circles around each report (10 meter radius) */}
+            {/* Yellow circles around each report (60 meter radius) */}
             {mapData.reports.map((report) => (
               <Circle
                 key={`safety-${report.id}`}
                 center={[report.lat, report.lng]}
-                radius={10}
+                radius={60}
                 pathOptions={{
                   color: '#eab308', // yellow
                   fillColor: '#eab308',
-                  fillOpacity: 0.2,
+                  fillOpacity: 0.15,
                   weight: 2,
-                  opacity: 1
+                  opacity: 0.8
                 }}
               />
             ))}
@@ -512,24 +512,24 @@ const GISMap: React.FC<GISMapProps> = ({ className, activeLayersState = {} }) =>
               <React.Fragment key={`overlap-${index}`}>
                 <Circle
                   center={[overlap.report1.lat, overlap.report1.lng]}
-                  radius={10}
+                  radius={60}
                   pathOptions={{
                     color: '#ef4444', // red
                     fillColor: '#ef4444',
-                    fillOpacity: 0.4,
+                    fillOpacity: 0.25,
                     weight: 3,
-                    opacity: 1
+                    opacity: 0.9
                   }}
                 />
                 <Circle
                   center={[overlap.report2.lat, overlap.report2.lng]}
-                  radius={10}
+                  radius={60}
                   pathOptions={{
                     color: '#ef4444', // red
                     fillColor: '#ef4444',
-                    fillOpacity: 0.4,
+                    fillOpacity: 0.25,
                     weight: 3,
-                    opacity: 1
+                    opacity: 0.9
                   }}
                 />
               </React.Fragment>
