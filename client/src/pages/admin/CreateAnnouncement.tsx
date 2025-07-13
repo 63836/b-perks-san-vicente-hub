@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Header } from '@/components/ui/navigation';
 import { useToast } from '@/hooks/use-toast';
+import { notificationStore } from '@/store/notificationStore';
 import { ArrowLeft, Upload, MapPin, Coins } from 'lucide-react';
 
 export default function CreateAnnouncement() {
@@ -30,6 +31,9 @@ export default function CreateAnnouncement() {
       title: "Success",
       description: `${formData.type === 'event' ? 'Event' : 'Announcement'} created successfully!`,
     });
+    
+    // Add notification for users
+    notificationStore.addNotification();
     
     setLocation('/admin/dashboard');
   };

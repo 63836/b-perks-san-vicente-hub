@@ -41,6 +41,7 @@ export default function Dashboard() {
   const { toast } = useToast();
   const [user, setUser] = useState(authStore.getCurrentUser());
   const [transactions, setTransactions] = useState(sampleTransactions);
+  const [notificationCount, setNotificationCount] = useState(0);
 
   useEffect(() => {
     const currentUser = authStore.getCurrentUser();
@@ -53,6 +54,13 @@ export default function Dashboard() {
       return;
     }
     setUser(currentUser);
+    
+    // Initialize notification count
+    setNotificationCount(notificationStore.getCount());
+    
+    // Subscribe to notification updates
+    const unsubscribe = notificationStore.subscribe(setNotificationCount);
+    return unsubscribe;
   }, [setLocation]);
 
   const handleLogout = () => {
@@ -81,7 +89,7 @@ export default function Dashboard() {
       <Header 
         title={`Welcome, ${user.name.split(' ')[0]}!`}
         showNotifications={true}
-        notificationCount={3}
+        notificationCount={notificationCount}
         onNotificationClick={() => setLocation('/notifications')}
       />
 

@@ -13,7 +13,8 @@ interface EventParticipant {
   joinedAt: string;
   proofSubmitted?: {
     type: 'image' | 'video';
-    url: string;
+    fileName: string;
+    fileSize: number;
     submittedAt: string;
   };
   status: 'registered' | 'participated' | 'approved' | 'declined';

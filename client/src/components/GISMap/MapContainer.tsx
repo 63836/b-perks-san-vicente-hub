@@ -395,57 +395,47 @@ const GISMap: React.FC<GISMapProps> = ({ className }) => {
 
           <LayersControl.Overlay checked name="Community Reports">
             <>
-              {mapData.reports.length > 0 && (
+              {mapData.reports.map((report) => (
                 <Marker
-                  position={[16.3954, 120.5968]}
+                  key={report.id}
+                  position={[report.lat, report.lng]}
                   icon={reportIcon}
                 >
-                  <Popup maxWidth={300}>
+                  <Popup>
                     <div>
-                      <strong>Community Reports ({mapData.reports.length})</strong>
-                      <div className="mt-2 space-y-2 max-h-48 overflow-y-auto">
-                        {mapData.reports.map((report) => (
-                          <div key={report.id} className="border-b pb-2 last:border-b-0">
-                            <div className="font-medium text-sm">{report.title}</div>
-                            <div className="text-xs text-muted-foreground">{report.description}</div>
-                            <Badge variant="outline" className="mt-1 text-xs">
-                              {report.status}
-                            </Badge>
-                          </div>
-                        ))}
-                      </div>
+                      <strong>{report.title}</strong>
+                      <br />
+                      <p className="text-sm">{report.description}</p>
+                      <Badge variant="outline" className="mt-1">
+                        {report.status}
+                      </Badge>
                     </div>
                   </Popup>
                 </Marker>
-              )}
+              ))}
             </>
           </LayersControl.Overlay>
 
           <LayersControl.Overlay checked name="Events">
             <>
-              {mapData.events.length > 0 && (
+              {mapData.events.map((event) => (
                 <Marker
-                  position={[16.3954, 120.5975]}
+                  key={event.id}
+                  position={[event.lat, event.lng]}
                   icon={eventIcon}
                 >
-                  <Popup maxWidth={300}>
+                  <Popup>
                     <div>
-                      <strong>Community Events ({mapData.events.length})</strong>
-                      <div className="mt-2 space-y-2 max-h-48 overflow-y-auto">
-                        {mapData.events.map((event) => (
-                          <div key={event.id} className="border-b pb-2 last:border-b-0">
-                            <div className="font-medium text-sm">{event.title}</div>
-                            <div className="text-xs text-muted-foreground">{event.description}</div>
-                            <Badge variant="secondary" className="mt-1 text-xs">
-                              {new Date(event.date).toLocaleDateString()}
-                            </Badge>
-                          </div>
-                        ))}
-                      </div>
+                      <strong>{event.title}</strong>
+                      <br />
+                      <p className="text-sm">{event.description}</p>
+                      <Badge variant="secondary" className="mt-1">
+                        {new Date(event.date).toLocaleDateString()}
+                      </Badge>
                     </div>
                   </Popup>
                 </Marker>
-              )}
+              ))}
             </>
           </LayersControl.Overlay>
 

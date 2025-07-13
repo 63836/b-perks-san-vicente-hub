@@ -31,14 +31,15 @@ const DrawingControl: React.FC<{
     click(e) {
       if (isDrawing) {
         const newPoint: [number, number] = [e.latlng.lat, e.latlng.lng];
-        setCurrentPolygon(prev => [...prev, newPoint]);
-      }
-    },
-    dblclick() {
-      if (isDrawing && currentPolygon.length >= 3) {
-        onPolygonComplete([...currentPolygon]);
-        setCurrentPolygon([]);
-        setIsDrawing(false);
+        const newPolygon = [...currentPolygon, newPoint];
+        setCurrentPolygon(newPolygon);
+        
+        // Auto-complete when we have 4 points (rectangle)
+        if (newPolygon.length === 4) {
+          onPolygonComplete([...newPolygon]);
+          setCurrentPolygon([]);
+          setIsDrawing(false);
+        }
       }
     }
   });
@@ -47,8 +48,8 @@ const DrawingControl: React.FC<{
     <Polygon
       positions={currentPolygon}
       pathOptions={{
-        color: '#3b82f6',
-        fillColor: '#3b82f6',
+        color: '#10b981',
+        fillColor: '#10b981',
         fillOpacity: 0.3,
         weight: 2,
         dashArray: '5, 5'
@@ -124,6 +125,15 @@ export default function ManagePuroks() {
     toast({
       title: "Success",
       description: "New purok boundary created successfully!",
+    });
+  };
+
+  const handleSaveAllPuroks = () => {
+    // Save to localStorage for persistence
+    localStorage.setItem('barangay_puroks', JSON.stringify(puroks));
+    toast({
+      title: "Success",
+      description: "All purok boundaries saved successfully!",
     });
   };
 
@@ -226,8 +236,15 @@ export default function ManagePuroks() {
                   <p><strong>Instructions:</strong></p>
                   <p>1. Enter purok name and select safety level</p>
                   <p>2. Click "Start Drawing" to begin</p>
-                  <p>3. Click on map to add boundary points</p>
-                  <p>4. Double-click to complete the boundary</p>
+                  <p>3. Click 4 points on the map to create a rectangle boundary</p>
+                  <p>4. Boundary will auto-complete after 4 clicks</p>
+                </div>
+                
+                <div className="mt-4 flex gap-2">
+                  <Button onClick={handleSaveAllPuroks} variant="outline" className="flex-1">
+                    <Save className="h-4 w-4 mr-2" />
+                    Save All
+                  </Button>
                 </div>
               </CardContent>
             </Card>
