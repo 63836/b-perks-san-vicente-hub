@@ -255,6 +255,96 @@ interface OfflineControlProps {
   isOffline: boolean;
 }
 
+const MapLayersControl: React.FC<{
+  baseLayer: 'street' | 'satellite';
+  layers: any;
+  onBaseLayerChange: (layer: 'street' | 'satellite') => void;
+  onLayerToggle: (layer: string) => void;
+}> = ({ baseLayer, layers, onBaseLayerChange, onLayerToggle }) => {
+  return (
+    <div className="absolute top-4 left-4 z-[1000] space-y-2">
+      <Card className="p-3">
+        <CardHeader className="p-0 pb-2">
+          <CardTitle className="text-sm flex items-center gap-2">
+            <Layers className="h-4 w-4" />
+            Map Layers
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-0 space-y-3">
+          {/* Base Layer Selection */}
+          <div className="space-y-2">
+            <Label className="text-xs font-medium text-muted-foreground">Base Map</Label>
+            <div className="space-y-2">
+              <div className="flex items-center space-x-2">
+                <Switch
+                  checked={baseLayer === 'street'}
+                  onCheckedChange={(checked) => checked && onBaseLayerChange('street')}
+                />
+                <Label className="text-xs flex items-center gap-1">
+                  <Map className="h-3 w-3" />
+                  Street View
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Switch
+                  checked={baseLayer === 'satellite'}
+                  onCheckedChange={(checked) => checked && onBaseLayerChange('satellite')}
+                />
+                <Label className="text-xs flex items-center gap-1">
+                  <Navigation className="h-3 w-3" />
+                  Satellite View
+                </Label>
+              </div>
+            </div>
+          </div>
+          
+          {/* Overlay Layers */}
+          <div className="space-y-2">
+            <Label className="text-xs font-medium text-muted-foreground">Data Layers</Label>
+            <div className="space-y-2">
+              <div className="flex items-center space-x-2">
+                <Switch
+                  checked={layers.currentLocation}
+                  onCheckedChange={() => onLayerToggle('currentLocation')}
+                />
+                <Label className="text-xs">Current Location</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Switch
+                  checked={layers.reports}
+                  onCheckedChange={() => onLayerToggle('reports')}
+                />
+                <Label className="text-xs">Community Reports</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Switch
+                  checked={layers.events}
+                  onCheckedChange={() => onLayerToggle('events')}
+                />
+                <Label className="text-xs">Events</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Switch
+                  checked={layers.safetyAreas}
+                  onCheckedChange={() => onLayerToggle('safetyAreas')}
+                />
+                <Label className="text-xs">Safety Areas</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Switch
+                  checked={layers.puroks}
+                  onCheckedChange={() => onLayerToggle('puroks')}
+                />
+                <Label className="text-xs">Purok Boundaries</Label>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
+
 const OfflineControl: React.FC<OfflineControlProps> = ({ onDownloadTiles, isDownloading, isOffline }) => {
   return (
     <div className="absolute top-4 right-4 z-[1000] space-y-2">
@@ -376,6 +466,13 @@ const GISMap: React.FC<GISMapProps> = ({ className }) => {
     }
   };
 
+  const handleLayerToggle = (layer: string) => {
+    setLayers(prev => ({
+      ...prev,
+      [layer]: !prev[layer as keyof typeof prev]
+    }));
+  };
+
   return (
     <div className={`relative ${className}`}>
       <MapContainer
@@ -384,130 +481,122 @@ const GISMap: React.FC<GISMapProps> = ({ className }) => {
         style={{ height: '100%', width: '100%' }}
         className="rounded-lg"
       >
-        <LayersControl position="topleft">
-          <LayersControl.BaseLayer checked name="Street Map">
-            <TileLayer
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            />
-          </LayersControl.BaseLayer>
-          
-          <LayersControl.BaseLayer name="Satellite">
-            <TileLayer
-              attribution='&copy; <a href="https://www.esri.com/">Esri</a>'
-              url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
-            />
-          </LayersControl.BaseLayer>
+        {/* Base Layer - Always show one */}
+        <TileLayer
+          attribution={baseLayer === 'street' 
+            ? '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            : '&copy; <a href="https://www.esri.com/">Esri</a>'
+          }
+          url={baseLayer === 'street' 
+            ? "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            : "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+          }
+        />
 
-          <LayersControl.Overlay checked name="Current Location">
-            <LocationMarker />
-          </LayersControl.Overlay>
+        {/* Conditional Layer Rendering */}
+        {layers.currentLocation && <LocationMarker />}
 
-          <LayersControl.Overlay checked name="Community Reports">
-            <>
-              {mapData.reports.map((report) => (
-                <Marker
-                  key={report.id}
-                  position={[report.lat, report.lng]}
-                  icon={reportIcon}
-                >
-                  <Popup>
-                    <div>
-                      <strong>{report.title}</strong>
-                      <br />
-                      <p className="text-sm">{report.description}</p>
-                      <Badge variant="outline" className="mt-1">
-                        {report.status}
-                      </Badge>
-                    </div>
-                  </Popup>
-                </Marker>
-              ))}
-            </>
-          </LayersControl.Overlay>
+        {layers.reports && mapData.reports.map((report) => (
+          <Marker
+            key={report.id}
+            position={[report.lat, report.lng]}
+            icon={reportIcon}
+          >
+            <Popup>
+              <div>
+                <strong>{report.title}</strong>
+                <br />
+                <p className="text-sm">{report.description}</p>
+                <Badge variant="outline" className="mt-1">
+                  {report.status}
+                </Badge>
+              </div>
+            </Popup>
+          </Marker>
+        ))}
 
-          <LayersControl.Overlay checked name="Events">
-            <>
-              {mapData.events.map((event) => (
-                <Marker
-                  key={event.id}
-                  position={[event.lat, event.lng]}
-                  icon={eventIcon}
-                >
-                  <Popup>
-                    <div>
-                      <strong>{event.title}</strong>
-                      <br />
-                      <p className="text-sm">{event.description}</p>
-                      <Badge variant="secondary" className="mt-1">
-                        {new Date(event.date).toLocaleDateString()}
-                      </Badge>
-                    </div>
-                  </Popup>
-                </Marker>
-              ))}
-            </>
-          </LayersControl.Overlay>
+        {layers.events && mapData.events.map((event) => (
+          <Marker
+            key={event.id}
+            position={[event.lat, event.lng]}
+            icon={eventIcon}
+          >
+            <Popup>
+              <div>
+                <strong>{event.title}</strong>
+                <br />
+                <p className="text-sm">{event.description}</p>
+                <Badge variant="secondary" className="mt-1">
+                  {new Date(event.date).toLocaleDateString()}
+                </Badge>
+              </div>
+            </Popup>
+          </Marker>
+        ))}
 
-          <LayersControl.Overlay checked name="Purok Boundaries & Safety Areas">
-            <>
-              {mapData.puroks.map((purok) => (
-                <Polygon
-                  key={purok.id}
-                  positions={purok.coordinates}
-                  pathOptions={{
-                    color: getSafetyColor(purok.safetyLevel),
-                    fillColor: getSafetyColor(purok.safetyLevel),
-                    fillOpacity: 0.2,
-                    weight: 2
-                  }}
+        {layers.puroks && mapData.puroks.map((purok) => (
+          <Polygon
+            key={purok.id}
+            positions={purok.coordinates}
+            pathOptions={{
+              color: getSafetyColor(purok.safetyLevel),
+              fillColor: getSafetyColor(purok.safetyLevel),
+              fillOpacity: 0.2,
+              weight: 2
+            }}
+          >
+            <Popup>
+              <div>
+                <strong>{purok.name}</strong>
+                <br />
+                <Badge 
+                  className={`mt-1 ${
+                    purok.safetyLevel === 'high' ? 'bg-success' :
+                    purok.safetyLevel === 'medium' ? 'bg-warning' : 'bg-destructive'
+                  } text-white`}
                 >
-                  <Popup>
-                    <div>
-                      <strong>{purok.name}</strong>
-                      <br />
-                      <Badge 
-                        className={`mt-1 ${
-                          purok.safetyLevel === 'high' ? 'bg-success' :
-                          purok.safetyLevel === 'medium' ? 'bg-warning' : 'bg-destructive'
-                        } text-white`}
-                      >
-                        {purok.safetyLevel} safety
-                      </Badge>
-                    </div>
-                  </Popup>
-                </Polygon>
-              ))}
-              {mapData.safetyAreas.map((area) => (
-                <Polygon
-                  key={area.id}
-                  positions={area.coordinates}
-                  pathOptions={{
-                    color: getSafetyColor(area.level),
-                    fillColor: getSafetyColor(area.level),
-                    fillOpacity: 0.3,
-                    weight: 3
-                  }}
+                  {purok.safetyLevel} safety
+                </Badge>
+              </div>
+            </Popup>
+          </Polygon>
+        ))}
+
+        {layers.safetyAreas && mapData.safetyAreas.map((area) => (
+          <Polygon
+            key={area.id}
+            positions={area.coordinates}
+            pathOptions={{
+              color: getSafetyColor(area.level),
+              fillColor: getSafetyColor(area.level),
+              fillOpacity: 0.3,
+              weight: 3
+            }}
+          >
+            <Popup>
+              <div>
+                <strong>{area.name}</strong>
+                <br />
+                <Badge 
+                  className={`mt-1 ${
+                    area.level === 'high' ? 'bg-success' :
+                    area.level === 'medium' ? 'bg-warning' : 'bg-destructive'
+                  } text-white`}
                 >
-                  <Popup>
-                    <div>
-                      <strong>{area.name}</strong>
-                      <br />
-                      <Badge 
-                        className={`mt-1 ${
-                          area.level === 'high' ? 'bg-success' :
-                          area.level === 'medium' ? 'bg-warning' : 'bg-destructive'
-                        } text-white`}
-                      >
-                        {area.level} safety
-                      </Badge>
-                    </div>
-                  </Popup>
-                </Polygon>
-              ))}
-            </>
-          </LayersControl.Overlay>
-        </LayersControl>
+                  {area.level} safety
+                </Badge>
+              </div>
+            </Popup>
+          </Polygon>
+        ))}
+
+        {/* Custom Map Layers Control */}
+        <MapLayersControl
+          baseLayer={baseLayer}
+          layers={layers}
+          onBaseLayerChange={setBaseLayer}
+          onLayerToggle={handleLayerToggle}
+        />
 
         <OfflineControl
           onDownloadTiles={handleDownloadTiles}
