@@ -118,6 +118,22 @@ const sampleMapData: MapData = {
       title: 'Illegal Dumping',
       description: 'Garbage dumped in vacant lot',
       status: 'in-progress'
+    },
+    {
+      id: '6',
+      lat: 16.3941,
+      lng: 120.5981,
+      title: 'Noise Complaint',
+      description: 'Loud music from nearby establishment',
+      status: 'pending'
+    },
+    {
+      id: '7',
+      lat: 16.3942,
+      lng: 120.5982,
+      title: 'Stray Dogs',
+      description: 'Multiple stray dogs in the area',
+      status: 'pending'
     }
   ],
   events: [
@@ -407,6 +423,8 @@ const GISMap: React.FC<GISMapProps> = ({ className, activeLayersState = {} }) =>
 
   // Calculate overlapping reports for safety level visualization
   const overlappingReports = layers.safetyAreas ? findOverlappingReports(mapData.reports) : [];
+  
+  // Calculate overlapping reports for red circle visualization
 
   useEffect(() => {
     const handleOnline = () => setIsOffline(false);
@@ -485,49 +503,50 @@ const GISMap: React.FC<GISMapProps> = ({ className, activeLayersState = {} }) =>
         {/* Safety Level Visualization - Yellow circles around reports and red overlaps */}
         {layers.safetyAreas && (
           <>
-            {/* Yellow circles around each report (90 meter radius) */}
-            {mapData.reports.map((report) => (
-              <Circle
-                key={`safety-${report.id}`}
-                center={[report.lat, report.lng]}
-                radius={90}
-                pathOptions={{
-                  color: '#eab308', // yellow
-                  fillColor: '#eab308',
-                  fillOpacity: 0.1,
-                  weight: 2,
-                  opacity: 0.7
-                }}
-              />
-            ))}
+            {/* Get list of overlapping report IDs */}
+            {(() => {
+              const overlappingIds = new Set();
+              overlappingReports.forEach(overlap => {
+                overlappingIds.add(overlap.report1.id);
+                overlappingIds.add(overlap.report2.id);
+              });
+              
+              return (
+                <>
+                  {/* Yellow circles for non-overlapping reports */}
+                  {mapData.reports.filter(report => !overlappingIds.has(report.id)).map((report) => (
+                    <Circle
+                      key={`safety-yellow-${report.id}`}
+                      center={[report.lat, report.lng]}
+                      radius={90}
+                      pathOptions={{
+                        color: '#eab308', // yellow
+                        fillColor: '#eab308',
+                        fillOpacity: 0.15,
+                        weight: 2,
+                        opacity: 0.8
+                      }}
+                    />
+                  ))}
 
-            {/* Red circles for overlapping reports */}
-            {overlappingReports.map((overlap, index) => (
-              <React.Fragment key={`overlap-${index}`}>
-                <Circle
-                  center={[overlap.report1.lat, overlap.report1.lng]}
-                  radius={90}
-                  pathOptions={{
-                    color: '#ef4444', // red
-                    fillColor: '#ef4444',
-                    fillOpacity: 0.2,
-                    weight: 3,
-                    opacity: 0.8
-                  }}
-                />
-                <Circle
-                  center={[overlap.report2.lat, overlap.report2.lng]}
-                  radius={90}
-                  pathOptions={{
-                    color: '#ef4444', // red
-                    fillColor: '#ef4444',
-                    fillOpacity: 0.2,
-                    weight: 3,
-                    opacity: 0.8
-                  }}
-                />
-              </React.Fragment>
-            ))}
+                  {/* Red circles for overlapping reports */}
+                  {mapData.reports.filter(report => overlappingIds.has(report.id)).map((report) => (
+                    <Circle
+                      key={`safety-red-${report.id}`}
+                      center={[report.lat, report.lng]}
+                      radius={90}
+                      pathOptions={{
+                        color: '#ef4444', // red
+                        fillColor: '#ef4444',
+                        fillOpacity: 0.3,
+                        weight: 3,
+                        opacity: 1
+                      }}
+                    />
+                  ))}
+                </>
+              );
+            })()}
           </>
         )}
 
