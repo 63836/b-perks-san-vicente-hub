@@ -402,11 +402,17 @@ const GISMap: React.FC<GISMapProps> = ({ className, activeLayersState = {} }) =>
     reports: activeLayersState.reports || false,
     events: activeLayersState.events || false,
     safetyAreas: activeLayersState.safety || false,
-    puroks: activeLayersState.puroks || false
+    puroks: false // Removed purok boundaries
   };
 
   // Calculate overlapping reports for safety level visualization
   const overlappingReports = layers.safetyAreas ? findOverlappingReports(mapData.reports) : [];
+  
+  // Debug logs
+  console.log('Safety Areas Layer Active:', layers.safetyAreas);
+  console.log('Active Layers State:', activeLayersState);
+  console.log('Reports Count:', mapData.reports.length);
+  console.log('Overlapping Reports:', overlappingReports);
 
   useEffect(() => {
     const handleOnline = () => setIsOffline(false);
@@ -494,9 +500,9 @@ const GISMap: React.FC<GISMapProps> = ({ className, activeLayersState = {} }) =>
                 pathOptions={{
                   color: '#eab308', // yellow
                   fillColor: '#eab308',
-                  fillOpacity: 0.1,
-                  weight: 1,
-                  opacity: 0.6
+                  fillOpacity: 0.2,
+                  weight: 2,
+                  opacity: 1
                 }}
               />
             ))}
@@ -510,9 +516,9 @@ const GISMap: React.FC<GISMapProps> = ({ className, activeLayersState = {} }) =>
                   pathOptions={{
                     color: '#ef4444', // red
                     fillColor: '#ef4444',
-                    fillOpacity: 0.3,
-                    weight: 2,
-                    opacity: 0.8
+                    fillOpacity: 0.4,
+                    weight: 3,
+                    opacity: 1
                   }}
                 />
                 <Circle
@@ -521,9 +527,9 @@ const GISMap: React.FC<GISMapProps> = ({ className, activeLayersState = {} }) =>
                   pathOptions={{
                     color: '#ef4444', // red
                     fillColor: '#ef4444',
-                    fillOpacity: 0.3,
-                    weight: 2,
-                    opacity: 0.8
+                    fillOpacity: 0.4,
+                    weight: 3,
+                    opacity: 1
                   }}
                 />
               </React.Fragment>

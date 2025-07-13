@@ -15,8 +15,7 @@ const mapLayers = [
   { id: 'satellite', name: 'Satellite View', active: false, type: 'Base Layer' },
   { id: 'reports', name: 'Community Reports', active: true, type: 'Data Layer' },
   { id: 'events', name: 'Event Locations', active: true, type: 'Data Layer' },
-  { id: 'safety', name: 'Safety Levels', active: false, type: 'Data Layer' },
-  { id: 'puroks', name: 'Purok Boundaries', active: false, type: 'Data Layer' }
+  { id: 'safety', name: 'Safety Levels', active: false, type: 'Data Layer' }
 ];
 
 
