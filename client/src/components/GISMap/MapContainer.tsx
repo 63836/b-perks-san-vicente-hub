@@ -360,7 +360,7 @@ const calculateDistance = (lat1: number, lng1: number, lat2: number, lng2: numbe
   return R * c;
 };
 
-// Function to check if reports are overlapping (within 60 meters)
+// Function to check if reports are overlapping (within 90 meters)
 const findOverlappingReports = (reports: MapData['reports']) => {
   const overlappingPairs: Array<{report1: MapData['reports'][0], report2: MapData['reports'][0]}> = [];
   
@@ -371,7 +371,7 @@ const findOverlappingReports = (reports: MapData['reports']) => {
         reports[j].lat, reports[j].lng
       );
       
-      if (distance <= 60) { // 60 meters
+      if (distance <= 90) { // 90 meters
         overlappingPairs.push({
           report1: reports[i],
           report2: reports[j]
@@ -407,12 +407,6 @@ const GISMap: React.FC<GISMapProps> = ({ className, activeLayersState = {} }) =>
 
   // Calculate overlapping reports for safety level visualization
   const overlappingReports = layers.safetyAreas ? findOverlappingReports(mapData.reports) : [];
-  
-  // Debug logs
-  console.log('Safety Areas Layer Active:', layers.safetyAreas);
-  console.log('Active Layers State:', activeLayersState);
-  console.log('Reports Count:', mapData.reports.length);
-  console.log('Overlapping Reports:', overlappingReports);
 
   useEffect(() => {
     const handleOnline = () => setIsOffline(false);
@@ -491,18 +485,18 @@ const GISMap: React.FC<GISMapProps> = ({ className, activeLayersState = {} }) =>
         {/* Safety Level Visualization - Yellow circles around reports and red overlaps */}
         {layers.safetyAreas && (
           <>
-            {/* Yellow circles around each report (60 meter radius) */}
+            {/* Yellow circles around each report (90 meter radius) */}
             {mapData.reports.map((report) => (
               <Circle
                 key={`safety-${report.id}`}
                 center={[report.lat, report.lng]}
-                radius={60}
+                radius={90}
                 pathOptions={{
                   color: '#eab308', // yellow
                   fillColor: '#eab308',
-                  fillOpacity: 0.15,
+                  fillOpacity: 0.1,
                   weight: 2,
-                  opacity: 0.8
+                  opacity: 0.7
                 }}
               />
             ))}
@@ -512,24 +506,24 @@ const GISMap: React.FC<GISMapProps> = ({ className, activeLayersState = {} }) =>
               <React.Fragment key={`overlap-${index}`}>
                 <Circle
                   center={[overlap.report1.lat, overlap.report1.lng]}
-                  radius={60}
+                  radius={90}
                   pathOptions={{
                     color: '#ef4444', // red
                     fillColor: '#ef4444',
-                    fillOpacity: 0.25,
+                    fillOpacity: 0.2,
                     weight: 3,
-                    opacity: 0.9
+                    opacity: 0.8
                   }}
                 />
                 <Circle
                   center={[overlap.report2.lat, overlap.report2.lng]}
-                  radius={60}
+                  radius={90}
                   pathOptions={{
                     color: '#ef4444', // red
                     fillColor: '#ef4444',
-                    fillOpacity: 0.25,
+                    fillOpacity: 0.2,
                     weight: 3,
-                    opacity: 0.9
+                    opacity: 0.8
                   }}
                 />
               </React.Fragment>
@@ -556,61 +550,7 @@ const GISMap: React.FC<GISMapProps> = ({ className, activeLayersState = {} }) =>
           </Marker>
         ))}
 
-        {layers.puroks && mapData.puroks.map((purok) => (
-          <Polygon
-            key={purok.id}
-            positions={purok.coordinates}
-            pathOptions={{
-              color: getSafetyColor(purok.safetyLevel),
-              fillColor: getSafetyColor(purok.safetyLevel),
-              fillOpacity: 0.2,
-              weight: 2
-            }}
-          >
-            <Popup>
-              <div>
-                <strong>{purok.name}</strong>
-                <br />
-                <Badge 
-                  className={`mt-1 ${
-                    purok.safetyLevel === 'high' ? 'bg-success' :
-                    purok.safetyLevel === 'medium' ? 'bg-warning' : 'bg-destructive'
-                  } text-white`}
-                >
-                  {purok.safetyLevel} safety
-                </Badge>
-              </div>
-            </Popup>
-          </Polygon>
-        ))}
-
-        {layers.safetyAreas && mapData.safetyAreas.map((area) => (
-          <Polygon
-            key={area.id}
-            positions={area.coordinates}
-            pathOptions={{
-              color: getSafetyColor(area.level),
-              fillColor: getSafetyColor(area.level),
-              fillOpacity: 0.3,
-              weight: 3
-            }}
-          >
-            <Popup>
-              <div>
-                <strong>{area.name}</strong>
-                <br />
-                <Badge 
-                  className={`mt-1 ${
-                    area.level === 'high' ? 'bg-success' :
-                    area.level === 'medium' ? 'bg-warning' : 'bg-destructive'
-                  } text-white`}
-                >
-                  {area.level} safety
-                </Badge>
-              </div>
-            </Popup>
-          </Polygon>
-        ))}
+        {/* Removed polygon-based safety areas and puroks - using circles instead */}
 
 
 
