@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Header, BottomNavigation } from '@/components/ui/navigation';
 import { authStore } from '@/store/authStore';
+import { notificationStore } from '@/store/notificationStore';
 import { useToast } from '@/hooks/use-toast';
 import { Coins, TrendingUp, Calendar, Gift, MapPin, LogOut } from 'lucide-react';
 
