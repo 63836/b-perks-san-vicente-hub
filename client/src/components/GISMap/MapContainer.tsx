@@ -26,7 +26,21 @@ const createCustomIcon = (color: string) => {
   });
 };
 
-const reportIcon = createCustomIcon('#ef4444'); // red
+// Status-based report icons
+const getReportIcon = (status: string) => {
+  switch (status) {
+    case 'pending':
+    case 'dropped':
+      return createCustomIcon('#ef4444'); // red
+    case 'resolved':
+      return createCustomIcon('#10b981'); // green
+    case 'in-progress':
+      return createCustomIcon('#3b82f6'); // blue
+    default:
+      return createCustomIcon('#ef4444'); // red (default)
+  }
+};
+
 const eventIcon = createCustomIcon('#f59e0b'); // amber
 const safetyIcon = createCustomIcon('#10b981'); // green
 const currentLocationIcon = createCustomIcon('#3b82f6'); // blue
@@ -334,6 +348,41 @@ const getSafetyColor = (level: 'high' | 'medium' | 'low') => {
   }
 };
 
+// Utility function to calculate distance between two points in meters
+const calculateDistance = (lat1: number, lng1: number, lat2: number, lng2: number): number => {
+  const R = 6371000; // Earth's radius in meters
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLng = (lng2 - lng1) * Math.PI / 180;
+  const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+           Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+           Math.sin(dLng/2) * Math.sin(dLng/2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  return R * c;
+};
+
+// Function to check if reports are overlapping (within 10 meters)
+const findOverlappingReports = (reports: MapData['reports']) => {
+  const overlappingPairs: Array<{report1: MapData['reports'][0], report2: MapData['reports'][0]}> = [];
+  
+  for (let i = 0; i < reports.length; i++) {
+    for (let j = i + 1; j < reports.length; j++) {
+      const distance = calculateDistance(
+        reports[i].lat, reports[i].lng,
+        reports[j].lat, reports[j].lng
+      );
+      
+      if (distance <= 10) { // 10 meters
+        overlappingPairs.push({
+          report1: reports[i],
+          report2: reports[j]
+        });
+      }
+    }
+  }
+  
+  return overlappingPairs;
+};
+
 interface GISMapProps {
   className?: string;
   activeLayersState?: Record<string, boolean>;
@@ -355,6 +404,9 @@ const GISMap: React.FC<GISMapProps> = ({ className, activeLayersState = {} }) =>
     safetyAreas: activeLayersState.safety || false,
     puroks: activeLayersState.puroks || false
   };
+
+  // Calculate overlapping reports for safety level visualization
+  const overlappingReports = layers.safetyAreas ? findOverlappingReports(mapData.reports) : [];
 
   useEffect(() => {
     const handleOnline = () => setIsOffline(false);
@@ -407,24 +459,77 @@ const GISMap: React.FC<GISMapProps> = ({ className, activeLayersState = {} }) =>
         {/* Conditional Layer Rendering */}
         {layers.currentLocation && <LocationMarker />}
 
-        {layers.reports && mapData.reports.map((report) => (
-          <Marker
-            key={report.id}
-            position={[report.lat, report.lng]}
-            icon={reportIcon}
-          >
-            <Popup>
-              <div>
-                <strong>{report.title}</strong>
-                <br />
-                <p className="text-sm">{report.description}</p>
-                <Badge variant="outline" className="mt-1">
-                  {report.status}
-                </Badge>
-              </div>
-            </Popup>
-          </Marker>
-        ))}
+        {layers.reports && (
+          <>
+            {mapData.reports.map((report) => (
+              <Marker
+                key={report.id}
+                position={[report.lat, report.lng]}
+                icon={getReportIcon(report.status)}
+              >
+                <Popup>
+                  <div>
+                    <strong>{report.title}</strong>
+                    <br />
+                    <p className="text-sm">{report.description}</p>
+                    <Badge variant="outline" className="mt-1">
+                      {report.status}
+                    </Badge>
+                  </div>
+                </Popup>
+              </Marker>
+            ))}
+          </>
+        )}
+
+        {/* Safety Level Visualization - Yellow circles around reports and red overlaps */}
+        {layers.safetyAreas && (
+          <>
+            {/* Yellow circles around each report (10 meter radius) */}
+            {mapData.reports.map((report) => (
+              <Circle
+                key={`safety-${report.id}`}
+                center={[report.lat, report.lng]}
+                radius={10}
+                pathOptions={{
+                  color: '#eab308', // yellow
+                  fillColor: '#eab308',
+                  fillOpacity: 0.1,
+                  weight: 1,
+                  opacity: 0.6
+                }}
+              />
+            ))}
+
+            {/* Red circles for overlapping reports */}
+            {overlappingReports.map((overlap, index) => (
+              <React.Fragment key={`overlap-${index}`}>
+                <Circle
+                  center={[overlap.report1.lat, overlap.report1.lng]}
+                  radius={10}
+                  pathOptions={{
+                    color: '#ef4444', // red
+                    fillColor: '#ef4444',
+                    fillOpacity: 0.3,
+                    weight: 2,
+                    opacity: 0.8
+                  }}
+                />
+                <Circle
+                  center={[overlap.report2.lat, overlap.report2.lng]}
+                  radius={10}
+                  pathOptions={{
+                    color: '#ef4444', // red
+                    fillColor: '#ef4444',
+                    fillOpacity: 0.3,
+                    weight: 2,
+                    opacity: 0.8
+                  }}
+                />
+              </React.Fragment>
+            ))}
+          </>
+        )}
 
         {layers.events && mapData.events.map((event) => (
           <Marker
