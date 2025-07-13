@@ -2,13 +2,18 @@ import React, { useEffect, useRef, useState } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap, LayersControl, Circle, Polygon } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
-import markerIcon from 'leaflet/dist/images/marker-icon.png';
-import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { MapPin, Download, Wifi, WifiOff } from 'lucide-react';
+
+// Fix for default markers in React Leaflet
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+});
 
 // Custom icons for different marker types
 const createCustomIcon = (color: string) => {
@@ -249,15 +254,6 @@ const GISMap: React.FC<GISMapProps> = ({ className }) => {
   const [isDownloading, setIsDownloading] = useState(false);
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
   const [mapData] = useState<MapData>(sampleMapData);
-
-  // Fix for default markers in React Leaflet
-  useEffect(() => {
-    L.Icon.Default.mergeOptions({
-      iconRetinaUrl: new URL(markerIcon2x, import.meta.url).href,
-      iconUrl: new URL(markerIcon, import.meta.url).href,
-      shadowUrl: new URL(markerShadow, import.meta.url).href,
-    });
-  }, []);
 
   useEffect(() => {
     const handleOnline = () => setIsOffline(false);
