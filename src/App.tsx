@@ -7,6 +7,12 @@ import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
+import GISMap from "./pages/GISMap";
+import Events from "./pages/Events";
+import News from "./pages/News";
+import Rewards from "./pages/Rewards";
+import Report from "./pages/Report";
+import Notifications from "./pages/Notifications";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import NotFound from "./pages/NotFound";
 
@@ -23,6 +29,12 @@ const App = () => (
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/map" element={<GISMap />} />
+          <Route path="/events" element={<Events />} />
+          <Route path="/news" element={<News />} />
+          <Route path="/rewards" element={<Rewards />} />
+          <Route path="/report" element={<Report />} />
+          <Route path="/notifications" element={<Notifications />} />
           <Route path="/admin" element={<AdminDashboard />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
