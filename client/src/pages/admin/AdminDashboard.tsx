@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation } from 'wouter';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Header, BottomNavigation } from '@/components/ui/navigation';
@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 
 export default function AdminDashboard() {
-  const navigate = useNavigate();
+  const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [user, setUser] = useState(authStore.getCurrentUser());
 
@@ -32,15 +32,15 @@ export default function AdminDashboard() {
   useEffect(() => {
     const currentUser = authStore.getCurrentUser();
     if (!currentUser) {
-      navigate('/login');
+      setLocation('/login');
       return;
     }
     if (!currentUser.isAdmin) {
-      navigate('/dashboard');
+      setLocation('/dashboard');
       return;
     }
     setUser(currentUser);
-  }, [navigate]);
+  }, [setLocation]);
 
   const handleLogout = () => {
     authStore.logout();
@@ -48,7 +48,7 @@ export default function AdminDashboard() {
       title: "Logged out",
       description: "Admin session ended successfully.",
     });
-    navigate('/login');
+    setLocation('/login');
   };
 
   if (!user) return null;
@@ -114,7 +114,7 @@ export default function AdminDashboard() {
             <Button 
               className="w-full justify-start" 
               variant="outline"
-              onClick={() => navigate('/admin/create-announcement')}
+              onClick={() => setLocation('/admin/create-announcement')}
             >
               <Newspaper className="h-4 w-4 mr-2" />
               Create Announcement

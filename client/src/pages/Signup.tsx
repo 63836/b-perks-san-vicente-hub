@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -18,7 +18,7 @@ export default function Signup() {
     confirmPassword: ''
   });
   const [isLoading, setIsLoading] = useState(false);
-  const navigate = useNavigate();
+  const [, setLocation] = useLocation();
   const { toast } = useToast();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -122,7 +122,7 @@ export default function Signup() {
 
       // Auto-login the new user
       authStore.login(user.username, user.password);
-      navigate('/dashboard');
+      setLocation('/dashboard');
       
     } catch (error) {
       toast({

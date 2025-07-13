@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -12,7 +12,7 @@ export default function Login() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const navigate = useNavigate();
+  const [, setLocation] = useLocation();
   const { toast } = useToast();
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -39,9 +39,9 @@ export default function Login() {
 
       // Navigate based on user role
       if (user.isAdmin) {
-        navigate('/admin');
+        setLocation('/admin');
       } else {
-        navigate('/dashboard');
+        setLocation('/dashboard');
       }
     } catch (error) {
       toast({

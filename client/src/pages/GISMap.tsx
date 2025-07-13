@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import GISMap from '@/components/GISMap/MapContainer';
+import GISMapContainer from '@/components/GISMap/MapContainer';
 import { offlineMapManager, BARANGAY_BOUNDS } from '@/utils/offlineMap';
 import { MapPin, Layers, Navigation, Shield, Download, Trash2 } from 'lucide-react';
 
@@ -95,7 +95,7 @@ export default function GISMap() {
         <Card>
           <CardContent className="p-0">
             <div className="h-96 rounded-lg overflow-hidden">
-              <GISMap className="h-full w-full" />
+              <GISMapContainer className="h-full w-full" />
             </div>
           </CardContent>
         </Card>

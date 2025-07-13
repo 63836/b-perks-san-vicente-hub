@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation } from 'wouter';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -37,7 +37,7 @@ const sampleTransactions = [
 ];
 
 export default function Dashboard() {
-  const navigate = useNavigate();
+  const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [user, setUser] = useState(authStore.getCurrentUser());
   const [transactions, setTransactions] = useState(sampleTransactions);
@@ -45,15 +45,15 @@ export default function Dashboard() {
   useEffect(() => {
     const currentUser = authStore.getCurrentUser();
     if (!currentUser) {
-      navigate('/login');
+      setLocation('/login');
       return;
     }
     if (currentUser.isAdmin) {
-      navigate('/admin');
+      setLocation('/admin');
       return;
     }
     setUser(currentUser);
-  }, [navigate]);
+  }, [setLocation]);
 
   const handleLogout = () => {
     authStore.logout();
@@ -61,7 +61,7 @@ export default function Dashboard() {
       title: "Logged out",
       description: "You have been successfully logged out.",
     });
-    navigate('/login');
+    setLocation('/login');
   };
 
   const formatTimestamp = (timestamp: string) => {
@@ -82,7 +82,7 @@ export default function Dashboard() {
         title={`Welcome, ${user.name.split(' ')[0]}!`}
         showNotifications={true}
         notificationCount={3}
-        onNotificationClick={() => navigate('/notifications')}
+        onNotificationClick={() => setLocation('/notifications')}
       />
 
       <div className="p-4 space-y-6">
@@ -104,7 +104,7 @@ export default function Dashboard() {
 
         {/* Quick Actions */}
         <div className="grid grid-cols-2 gap-4">
-          <Card className="hover:shadow-medium transition-shadow cursor-pointer" onClick={() => navigate('/events')}>
+          <Card className="hover:shadow-medium transition-shadow cursor-pointer" onClick={() => setLocation('/events')}>
             <CardContent className="p-4 text-center">
               <Calendar className="h-8 w-8 mx-auto mb-2 text-primary" />
               <h3 className="font-semibold">Events</h3>
@@ -112,7 +112,7 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          <Card className="hover:shadow-medium transition-shadow cursor-pointer" onClick={() => navigate('/rewards')}>
+          <Card className="hover:shadow-medium transition-shadow cursor-pointer" onClick={() => setLocation('/rewards')}>
             <CardContent className="p-4 text-center">
               <Gift className="h-8 w-8 mx-auto mb-2 text-accent" />
               <h3 className="font-semibold">Rewards</h3>

@@ -1,4 +1,4 @@
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'wouter';
 import { Home, MapPin, Calendar, Newspaper, Gift, FileText, Settings, Bell } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
@@ -25,20 +25,20 @@ interface BottomNavigationProps {
 }
 
 export function BottomNavigation({ isAdmin = false }: BottomNavigationProps) {
-  const location = useLocation();
+  const [location] = useLocation();
   const navItems = isAdmin ? adminNavItems : userNavItems;
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-border z-50">
       <div className="flex justify-around items-center h-16 px-2">
         {navItems.map((item) => {
-          const isActive = location.pathname === item.to;
+          const isActive = location === item.to;
           const Icon = item.icon;
           
           return (
             <Link
               key={item.to}
-              to={item.to}
+              href={item.to}
               className={cn(
                 "flex flex-col items-center justify-center flex-1 h-full space-y-1 transition-colors",
                 isActive 

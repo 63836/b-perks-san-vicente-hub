@@ -1,22 +1,22 @@
 import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation } from 'wouter';
 import { authStore } from '@/store/authStore';
 
 const Index = () => {
-  const navigate = useNavigate();
+  const [, setLocation] = useLocation();
 
   useEffect(() => {
     const user = authStore.getCurrentUser();
     if (user) {
       if (user.isAdmin) {
-        navigate('/admin');
+        setLocation('/admin');
       } else {
-        navigate('/dashboard');
+        setLocation('/dashboard');
       }
     } else {
-      navigate('/login');
+      setLocation('/login');
     }
-  }, [navigate]);
+  }, [setLocation]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background">
