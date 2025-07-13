@@ -61,100 +61,171 @@ interface MapData {
   }>;
 }
 
-// Sample data for Barangay San Vicente
+// Sample data for Barangay San Vicente, Baguio City
 const sampleMapData: MapData = {
   reports: [
     {
       id: '1',
-      lat: 16.4025,
-      lng: 120.5962,
+      lat: 16.4125,
+      lng: 120.5950,
       title: 'Broken Street Light',
-      description: 'Street light not working on Main Street',
+      description: 'Street light not working on Upper Gen. Luna Road',
       status: 'pending'
     },
     {
       id: '2',
-      lat: 16.4020,
-      lng: 120.5958,
+      lat: 16.4105,
+      lng: 120.5945,
       title: 'Pothole',
-      description: 'Large pothole causing traffic issues',
+      description: 'Large pothole on Kayang Street',
       status: 'in-progress'
+    },
+    {
+      id: '3',
+      lat: 16.4095,
+      lng: 120.5940,
+      title: 'Drainage Issue',
+      description: 'Clogged drainage near Session Road area',
+      status: 'resolved'
     }
   ],
   events: [
     {
       id: '1',
-      lat: 16.4023,
-      lng: 120.5960,
+      lat: 16.4115,
+      lng: 120.5955,
       title: 'Community Clean-up',
-      description: 'Monthly community cleaning activity',
+      description: 'Monthly community cleaning activity at Session Road',
       date: '2024-01-20'
     },
     {
       id: '2',
-      lat: 16.4028,
-      lng: 120.5965,
+      lat: 16.4100,
+      lng: 120.5935,
       title: 'Health Fair',
-      description: 'Free health checkups and consultations',
+      description: 'Free health checkups at Burnham Park area',
       date: '2024-01-28'
+    },
+    {
+      id: '3',
+      lat: 16.4130,
+      lng: 120.5960,
+      title: 'Tree Planting',
+      description: 'Environmental activity at Upper Gen. Luna',
+      date: '2024-02-05'
     }
   ],
   safetyAreas: [
     {
       id: '1',
-      name: 'Well-lit Area',
+      name: 'Session Road Commercial Area',
       level: 'high',
       coordinates: [
-        [16.4020, 120.5955],
-        [16.4025, 120.5955],
-        [16.4025, 120.5965],
-        [16.4020, 120.5965]
+        [16.4110, 120.5930],
+        [16.4120, 120.5930],
+        [16.4120, 120.5950],
+        [16.4110, 120.5950]
+      ]
+    },
+    {
+      id: '2',
+      name: 'Burnham Park Area',
+      level: 'high',
+      coordinates: [
+        [16.4090, 120.5920],
+        [16.4110, 120.5920],
+        [16.4110, 120.5940],
+        [16.4090, 120.5940]
+      ]
+    },
+    {
+      id: '3',
+      name: 'Upper Gen. Luna Residential',
+      level: 'medium',
+      coordinates: [
+        [16.4120, 120.5940],
+        [16.4140, 120.5940],
+        [16.4140, 120.5970],
+        [16.4120, 120.5970]
       ]
     }
   ],
   puroks: [
     {
       id: '1',
-      name: 'Purok 1',
+      name: 'Purok 1 - Session Road Area',
       safetyLevel: 'high',
       coordinates: [
-        [16.4015, 120.5950],
-        [16.4020, 120.5950],
-        [16.4020, 120.5960],
-        [16.4015, 120.5960]
+        [16.4100, 120.5920],
+        [16.4115, 120.5920],
+        [16.4115, 120.5940],
+        [16.4100, 120.5940]
       ]
     },
     {
       id: '2',
-      name: 'Purok 2',
-      safetyLevel: 'medium',
+      name: 'Purok 2 - Central Business District',
+      safetyLevel: 'high',
       coordinates: [
-        [16.4020, 120.5950],
-        [16.4025, 120.5950],
-        [16.4025, 120.5960],
-        [16.4020, 120.5960]
+        [16.4115, 120.5920],
+        [16.4130, 120.5920],
+        [16.4130, 120.5940],
+        [16.4115, 120.5940]
       ]
     },
     {
       id: '3',
-      name: 'Purok 3',
-      safetyLevel: 'high',
+      name: 'Purok 3 - Upper Gen. Luna',
+      safetyLevel: 'medium',
       coordinates: [
-        [16.4025, 120.5950],
-        [16.4030, 120.5950],
-        [16.4030, 120.5960],
-        [16.4025, 120.5960]
+        [16.4100, 120.5940],
+        [16.4115, 120.5940],
+        [16.4115, 120.5960],
+        [16.4100, 120.5960]
       ]
     },
     {
       id: '4',
-      name: 'Purok 4',
+      name: 'Purok 4 - Residential Hills',
+      safetyLevel: 'medium',
+      coordinates: [
+        [16.4115, 120.5940],
+        [16.4130, 120.5940],
+        [16.4130, 120.5960],
+        [16.4115, 120.5960]
+      ]
+    },
+    {
+      id: '5',
+      name: 'Purok 5 - Kayang Extension',
       safetyLevel: 'low',
       coordinates: [
-        [16.4015, 120.5960],
-        [16.4020, 120.5960],
-        [16.4020, 120.5970],
-        [16.4015, 120.5970]
+        [16.4085, 120.5920],
+        [16.4100, 120.5920],
+        [16.4100, 120.5945],
+        [16.4085, 120.5945]
+      ]
+    },
+    {
+      id: '6',
+      name: 'Purok 6 - Lower Area',
+      safetyLevel: 'low',
+      coordinates: [
+        [16.4085, 120.5945],
+        [16.4100, 120.5945],
+        [16.4100, 120.5970],
+        [16.4085, 120.5970]
+      ]
+    },
+    {
+      id: '7',
+      name: 'Purok 7 - Outer Boundary',
+      safetyLevel: 'medium',
+      coordinates: [
+        [16.4130, 120.5920],
+        [16.4145, 120.5920],
+        [16.4145, 120.5950],
+        [16.4130, 120.5950]
       ]
     }
   ]
@@ -210,14 +281,14 @@ const LocationMarker: React.FC = () => {
         },
         () => {
           // Fallback to Barangay San Vicente center
-          const fallbackPosition: [number, number] = [16.4023, 120.5960];
+          const fallbackPosition: [number, number] = [16.4115, 120.5940];
           setPosition(fallbackPosition);
           map.setView(fallbackPosition, 16);
         }
       );
     } else {
       // Fallback for browsers without geolocation
-      const fallbackPosition: [number, number] = [16.4023, 120.5960];
+      const fallbackPosition: [number, number] = [16.4115, 120.5940];
       setPosition(fallbackPosition);
       map.setView(fallbackPosition, 16);
     }
@@ -284,8 +355,8 @@ const GISMap: React.FC<GISMapProps> = ({ className }) => {
   return (
     <div className={`relative ${className}`}>
       <MapContainer
-        center={[16.4023, 120.5960]}
-        zoom={16}
+        center={[16.4115, 120.5940]}
+        zoom={15}
         style={{ height: '100%', width: '100%' }}
         className="rounded-lg"
       >

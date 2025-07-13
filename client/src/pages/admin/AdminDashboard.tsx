@@ -141,6 +141,15 @@ export default function AdminDashboard() {
             <Button 
               className="w-full justify-start" 
               variant="outline"
+              onClick={() => setLocation('/admin/ongoing-events')}
+            >
+              <Calendar className="h-4 w-4 mr-2" />
+              Ongoing Events
+            </Button>
+            
+            <Button 
+              className="w-full justify-start" 
+              variant="outline"
               onClick={() => setLocation('/admin/reports')}
             >
               <FileX className="h-4 w-4 mr-2" />
