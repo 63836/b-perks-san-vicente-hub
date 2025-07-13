@@ -2,9 +2,9 @@ import React, { useEffect, useRef, useState } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap, LayersControl, Circle, Polygon } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png?url';
-import markerIcon from 'leaflet/dist/images/marker-icon.png?url';
-import markerShadow from 'leaflet/dist/images/marker-shadow.png?url';
+import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
+import markerIcon from 'leaflet/dist/images/marker-icon.png';
+import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -253,9 +253,9 @@ const GISMap: React.FC<GISMapProps> = ({ className }) => {
   // Fix for default markers in React Leaflet
   useEffect(() => {
     L.Icon.Default.mergeOptions({
-      iconRetinaUrl: markerIcon2x,
-      iconUrl: markerIcon,
-      shadowUrl: markerShadow,
+      iconRetinaUrl: new URL(markerIcon2x, import.meta.url).href,
+      iconUrl: new URL(markerIcon, import.meta.url).href,
+      shadowUrl: new URL(markerShadow, import.meta.url).href,
     });
   }, []);
 
