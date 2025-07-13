@@ -95,7 +95,7 @@ export default function GISMap() {
         <Card>
           <CardContent className="p-0">
             <div className="h-96 rounded-lg overflow-hidden">
-              <GISMapContainer className="h-full w-full" />
+              <GISMapContainer className="h-full w-full" activeLayersState={activeLayersState} />
             </div>
           </CardContent>
         </Card>

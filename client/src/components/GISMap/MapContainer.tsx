@@ -5,9 +5,8 @@ import 'leaflet/dist/leaflet.css';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
-import { MapPin, Download, Wifi, WifiOff, Layers, Map, Navigation, AlertTriangle } from 'lucide-react';
+
+import { MapPin, Download, Wifi, WifiOff } from 'lucide-react';
 
 // Fix for default markers in React Leaflet
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -255,95 +254,7 @@ interface OfflineControlProps {
   isOffline: boolean;
 }
 
-const MapLayersControl: React.FC<{
-  baseLayer: 'street' | 'satellite';
-  layers: any;
-  onBaseLayerChange: (layer: 'street' | 'satellite') => void;
-  onLayerToggle: (layer: string) => void;
-}> = ({ baseLayer, layers, onBaseLayerChange, onLayerToggle }) => {
-  return (
-    <div className="absolute top-4 left-4 z-[1000] space-y-2">
-      <Card className="p-3">
-        <CardHeader className="p-0 pb-2">
-          <CardTitle className="text-sm flex items-center gap-2">
-            <Layers className="h-4 w-4" />
-            Map Layers
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-0 space-y-3">
-          {/* Base Layer Selection */}
-          <div className="space-y-2">
-            <Label className="text-xs font-medium text-muted-foreground">Base Map</Label>
-            <div className="space-y-2">
-              <div className="flex items-center space-x-2">
-                <Switch
-                  checked={baseLayer === 'street'}
-                  onCheckedChange={(checked) => checked && onBaseLayerChange('street')}
-                />
-                <Label className="text-xs flex items-center gap-1">
-                  <Map className="h-3 w-3" />
-                  Street View
-                </Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Switch
-                  checked={baseLayer === 'satellite'}
-                  onCheckedChange={(checked) => checked && onBaseLayerChange('satellite')}
-                />
-                <Label className="text-xs flex items-center gap-1">
-                  <Navigation className="h-3 w-3" />
-                  Satellite View
-                </Label>
-              </div>
-            </div>
-          </div>
-          
-          {/* Overlay Layers */}
-          <div className="space-y-2">
-            <Label className="text-xs font-medium text-muted-foreground">Data Layers</Label>
-            <div className="space-y-2">
-              <div className="flex items-center space-x-2">
-                <Switch
-                  checked={layers.currentLocation}
-                  onCheckedChange={() => onLayerToggle('currentLocation')}
-                />
-                <Label className="text-xs">Current Location</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Switch
-                  checked={layers.reports}
-                  onCheckedChange={() => onLayerToggle('reports')}
-                />
-                <Label className="text-xs">Community Reports</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Switch
-                  checked={layers.events}
-                  onCheckedChange={() => onLayerToggle('events')}
-                />
-                <Label className="text-xs">Events</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Switch
-                  checked={layers.safetyAreas}
-                  onCheckedChange={() => onLayerToggle('safetyAreas')}
-                />
-                <Label className="text-xs">Safety Areas</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Switch
-                  checked={layers.puroks}
-                  onCheckedChange={() => onLayerToggle('puroks')}
-                />
-                <Label className="text-xs">Purok Boundaries</Label>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  );
-};
+
 
 const OfflineControl: React.FC<OfflineControlProps> = ({ onDownloadTiles, isDownloading, isOffline }) => {
   return (
@@ -425,20 +336,25 @@ const getSafetyColor = (level: 'high' | 'medium' | 'low') => {
 
 interface GISMapProps {
   className?: string;
+  activeLayersState?: Record<string, boolean>;
 }
 
-const GISMap: React.FC<GISMapProps> = ({ className }) => {
+const GISMap: React.FC<GISMapProps> = ({ className, activeLayersState = {} }) => {
   const [isDownloading, setIsDownloading] = useState(false);
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
   const [mapData] = useState<MapData>(sampleMapData);
-  const [baseLayer, setBaseLayer] = useState<'street' | 'satellite'>('street');
-  const [layers, setLayers] = useState({
-    currentLocation: true,
-    reports: true,
-    events: true,
-    safetyAreas: true,
-    puroks: true
-  });
+  
+  // Determine base layer from the activeLayersState
+  const baseLayer = activeLayersState.satellite ? 'satellite' : 'street';
+  
+  // Map the activeLayersState to the internal layer structure
+  const layers = {
+    currentLocation: activeLayersState.basemap || false, // Using basemap for current location
+    reports: activeLayersState.reports || false,
+    events: activeLayersState.events || false,
+    safetyAreas: activeLayersState.safety || false,
+    puroks: activeLayersState.puroks || false
+  };
 
   useEffect(() => {
     const handleOnline = () => setIsOffline(false);
@@ -466,12 +382,7 @@ const GISMap: React.FC<GISMapProps> = ({ className }) => {
     }
   };
 
-  const handleLayerToggle = (layer: string) => {
-    setLayers(prev => ({
-      ...prev,
-      [layer]: !prev[layer as keyof typeof prev]
-    }));
-  };
+
 
   return (
     <div className={`relative ${className}`}>
@@ -590,13 +501,7 @@ const GISMap: React.FC<GISMapProps> = ({ className }) => {
           </Polygon>
         ))}
 
-        {/* Custom Map Layers Control */}
-        <MapLayersControl
-          baseLayer={baseLayer}
-          layers={layers}
-          onBaseLayerChange={setBaseLayer}
-          onLayerToggle={handleLayerToggle}
-        />
+
 
         <OfflineControl
           onDownloadTiles={handleDownloadTiles}
