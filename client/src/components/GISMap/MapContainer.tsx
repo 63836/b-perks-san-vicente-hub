@@ -293,20 +293,18 @@ const LocationMarker: React.FC = () => {
         (pos) => {
           const { latitude, longitude } = pos.coords;
           setPosition([latitude, longitude]);
-          map.setView([latitude, longitude], 16);
+          // Don't auto-center on user location, keep focus on Barangay San Vicente
         },
         () => {
-          // Fallback to Barangay San Vicente center
-          const fallbackPosition: [number, number] = [16.3954, 120.5968];
-          setPosition(fallbackPosition);
-          map.setView(fallbackPosition, 16);
+          // Don't show location marker if geolocation fails
+          setPosition(null);
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 60000
         }
       );
-    } else {
-      // Fallback for browsers without geolocation
-      const fallbackPosition: [number, number] = [16.3954, 120.5968];
-      setPosition(fallbackPosition);
-      map.setView(fallbackPosition, 16);
     }
   }, [map]);
 
@@ -317,7 +315,7 @@ const LocationMarker: React.FC = () => {
           <MapPin className="h-4 w-4 mx-auto mb-1" />
           <strong>Your Location</strong>
           <br />
-          <small>Barangay San Vicente</small>
+          <small>Current GPS Position</small>
         </div>
       </Popup>
     </Marker>
@@ -395,49 +393,57 @@ const GISMap: React.FC<GISMapProps> = ({ className }) => {
             <LocationMarker />
           </LayersControl.Overlay>
 
-          <LayersControl.Overlay checked name="Community Reports">
+          <LayersControl.Overlay checked name="Community Reports & Events">
             <>
-              {mapData.reports.map((report) => (
+              {/* Group all reports */}
+              {mapData.reports.length > 0 && (
                 <Marker
-                  key={report.id}
-                  position={[report.lat, report.lng]}
+                  position={[16.3954, 120.5968]}
                   icon={reportIcon}
                 >
-                  <Popup>
+                  <Popup maxWidth={300}>
                     <div>
-                      <strong>{report.title}</strong>
-                      <br />
-                      <p className="text-sm">{report.description}</p>
-                      <Badge variant="outline" className="mt-1">
-                        {report.status}
-                      </Badge>
+                      <strong>Community Reports ({mapData.reports.length})</strong>
+                      <div className="mt-2 space-y-2 max-h-48 overflow-y-auto">
+                        {mapData.reports.map((report) => (
+                          <div key={report.id} className="border-b pb-2 last:border-b-0">
+                            <div className="font-medium text-sm">{report.title}</div>
+                            <div className="text-xs text-muted-foreground">{report.description}</div>
+                            <Badge variant="outline" className="mt-1 text-xs">
+                              {report.status}
+                            </Badge>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   </Popup>
                 </Marker>
-              ))}
-            </>
-          </LayersControl.Overlay>
-
-          <LayersControl.Overlay checked name="Events">
-            <>
-              {mapData.events.map((event) => (
+              )}
+              
+              {/* Group all events */}
+              {mapData.events.length > 0 && (
                 <Marker
-                  key={event.id}
-                  position={[event.lat, event.lng]}
+                  position={[16.3954, 120.5975]}
                   icon={eventIcon}
                 >
-                  <Popup>
+                  <Popup maxWidth={300}>
                     <div>
-                      <strong>{event.title}</strong>
-                      <br />
-                      <p className="text-sm">{event.description}</p>
-                      <Badge variant="secondary" className="mt-1">
-                        {new Date(event.date).toLocaleDateString()}
-                      </Badge>
+                      <strong>Community Events ({mapData.events.length})</strong>
+                      <div className="mt-2 space-y-2 max-h-48 overflow-y-auto">
+                        {mapData.events.map((event) => (
+                          <div key={event.id} className="border-b pb-2 last:border-b-0">
+                            <div className="font-medium text-sm">{event.title}</div>
+                            <div className="text-xs text-muted-foreground">{event.description}</div>
+                            <Badge variant="secondary" className="mt-1 text-xs">
+                              {new Date(event.date).toLocaleDateString()}
+                            </Badge>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   </Popup>
                 </Marker>
-              ))}
+              )}
             </>
           </LayersControl.Overlay>
 

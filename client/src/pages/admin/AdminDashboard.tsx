@@ -160,6 +160,15 @@ export default function AdminDashboard() {
                 </span>
               )}
             </Button>
+            
+            <Button 
+              className="w-full justify-start" 
+              variant="outline"
+              onClick={() => setLocation('/admin/manage-puroks')}
+            >
+              <AlertTriangle className="h-4 w-4 mr-2" />
+              Manage Purok Boundaries
+            </Button>
           </CardContent>
         </Card>
 
