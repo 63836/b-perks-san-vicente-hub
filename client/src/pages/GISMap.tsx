@@ -7,7 +7,7 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import GISMapContainer from '@/components/GISMap/MapContainer';
 import { offlineMapManager, BARANGAY_BOUNDS } from '@/utils/offlineMap';
-import { MapPin, Layers, Navigation, Shield, Download, Trash2 } from 'lucide-react';
+import { MapPin, Layers, Navigation, Download, Trash2 } from 'lucide-react';
 
 // Sample data for map layers
 const mapLayers = [
@@ -19,12 +19,7 @@ const mapLayers = [
   { id: 'puroks', name: 'Purok Boundaries', active: false, type: 'Data Layer' }
 ];
 
-const safetyLevels = [
-  { purok: 'Purok 1', level: 'high', description: 'Well-lit, regular patrol' },
-  { purok: 'Purok 2', level: 'medium', description: 'Moderate lighting' },
-  { purok: 'Purok 3', level: 'high', description: 'CCTV coverage' },
-  { purok: 'Purok 4', level: 'low', description: 'Limited lighting' }
-];
+
 
 export default function GISMap() {
   const [activeLayersState, setActiveLayersState] = useState(
@@ -33,14 +28,7 @@ export default function GISMap() {
   const [isDownloadingTiles, setIsDownloadingTiles] = useState(false);
   const [cacheSize, setCacheSize] = useState(0);
 
-  const getSafetyColor = (level: string) => {
-    switch (level) {
-      case 'high': return 'bg-success';
-      case 'medium': return 'bg-warning';
-      case 'low': return 'bg-destructive';
-      default: return 'bg-muted';
-    }
-  };
+
 
   const handleLayerToggle = (layerId: string) => {
     setActiveLayersState(prev => ({
@@ -100,56 +88,94 @@ export default function GISMap() {
           </CardContent>
         </Card>
 
-        {/* Offline Map Management */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Download className="h-5 w-5 mr-2" />
-              Offline Maps
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-medium text-sm">Cache Status</p>
-                <p className="text-xs text-muted-foreground">
-                  {cacheSize > 0 ? `${cacheSize} tiles cached` : 'No tiles cached'}
-                </p>
+        {/* Offline Maps and Map Legend */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Offline Maps - Minimized */}
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <Download className="h-4 w-4" />
+                  <span className="font-medium text-sm">Offline Maps</span>
+                </div>
+                <Badge variant={cacheSize > 0 ? 'default' : 'outline'} className="text-xs">
+                  {cacheSize > 0 ? 'Available' : 'Not Available'}
+                </Badge>
               </div>
-              <Badge variant={cacheSize > 0 ? 'default' : 'outline'}>
-                {cacheSize > 0 ? 'Available' : 'Not Available'}
-              </Badge>
-            </div>
-
-            <div className="flex gap-2">
-              <Button
-                onClick={handleDownloadOfflineMaps}
-                disabled={isDownloadingTiles}
-                className="flex-1"
-                size="sm"
-              >
-                <Download className="h-4 w-4 mr-2" />
-                {isDownloadingTiles ? 'Downloading...' : 'Download for Offline'}
-              </Button>
               
-              {cacheSize > 0 && (
+              <div className="flex gap-2">
                 <Button
-                  onClick={handleClearCache}
-                  variant="outline"
+                  onClick={handleDownloadOfflineMaps}
+                  disabled={isDownloadingTiles}
+                  className="flex-1"
                   size="sm"
                 >
-                  <Trash2 className="h-4 w-4" />
+                  <Download className="h-4 w-4 mr-2" />
+                  {isDownloadingTiles ? 'Downloading...' : 'Download'}
                 </Button>
-              )}
-            </div>
+                
+                {cacheSize > 0 && (
+                  <Button
+                    onClick={handleClearCache}
+                    variant="outline"
+                    size="sm"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
+            </CardContent>
+          </Card>
 
-            <div className="text-xs text-muted-foreground">
-              <p>• Downloads map tiles for Barangay San Vicente area</p>
-              <p>• Enables map viewing without internet connection</p>
-              <p>• Cache expires after 7 days</p>
-            </div>
-          </CardContent>
-        </Card>
+          {/* Map Legend */}
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <MapPin className="h-4 w-4" />
+                <span className="font-medium text-sm">Map Legend</span>
+              </div>
+              
+              <div className="space-y-2">
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                    <span className="text-xs">Current Location</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                    <span className="text-xs">Community Reports</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <div className="w-3 h-3 bg-amber-500 rounded-full"></div>
+                    <span className="text-xs">Event Locations</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                    <span className="text-xs">Safe Areas</span>
+                  </div>
+                </div>
+                
+                <div className="pt-2 border-t">
+                  <p className="text-xs text-muted-foreground mb-1">Safety Levels:</p>
+                  <div className="flex space-x-3">
+                    <div className="flex items-center space-x-1">
+                      <div className="w-2 h-2 bg-green-500"></div>
+                      <span className="text-xs">High</span>
+                    </div>
+                    <div className="flex items-center space-x-1">
+                      <div className="w-2 h-2 bg-yellow-500"></div>
+                      <span className="text-xs">Medium</span>
+                    </div>
+                    <div className="flex items-center space-x-1">
+                      <div className="w-2 h-2 bg-red-500"></div>
+                      <span className="text-xs">Low</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
 
         {/* Map Layers Control */}
         <Card>
@@ -180,73 +206,7 @@ export default function GISMap() {
           </CardContent>
         </Card>
 
-        {/* Purok Safety Levels */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Shield className="h-5 w-5 mr-2" />
-              Purok Safety Levels
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {safetyLevels.map((area, index) => (
-              <div key={index} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                <div>
-                  <p className="font-medium text-sm">{area.purok}</p>
-                  <p className="text-xs text-muted-foreground">{area.description}</p>
-                </div>
-                <Badge className={`${getSafetyColor(area.level)} text-white capitalize`}>
-                  {area.level}
-                </Badge>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
 
-        {/* Map Legend */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Map Legend</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <div className="grid grid-cols-2 gap-3">
-              <div className="flex items-center space-x-2">
-                <div className="w-4 h-4 bg-blue-500 rounded-full"></div>
-                <span className="text-sm">Current Location</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <div className="w-4 h-4 bg-red-500 rounded-full"></div>
-                <span className="text-sm">Community Reports</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <div className="w-4 h-4 bg-amber-500 rounded-full"></div>
-                <span className="text-sm">Event Locations</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <div className="w-4 h-4 bg-green-500 rounded-full"></div>
-                <span className="text-sm">Safe Areas</span>
-              </div>
-            </div>
-            
-            <div className="pt-2 border-t">
-              <p className="text-xs text-muted-foreground mb-2">Purok Safety Levels:</p>
-              <div className="flex space-x-4">
-                <div className="flex items-center space-x-1">
-                  <div className="w-3 h-3 bg-green-500"></div>
-                  <span className="text-xs">High</span>
-                </div>
-                <div className="flex items-center space-x-1">
-                  <div className="w-3 h-3 bg-yellow-500"></div>
-                  <span className="text-xs">Medium</span>
-                </div>
-                <div className="flex items-center space-x-1">
-                  <div className="w-3 h-3 bg-red-500"></div>
-                  <span className="text-xs">Low</span>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
 
         {/* Map Controls Info */}
         <Card>
