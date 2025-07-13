@@ -243,7 +243,7 @@ export default function Signup() {
 
             <Button 
               type="submit" 
-              className="w-full bg-gradient-primary" 
+              className="w-full bg-primary text-primary-foreground hover:bg-primary/90" 
               disabled={isLoading}
             >
               {isLoading ? "Creating Account..." : "Create Account"}

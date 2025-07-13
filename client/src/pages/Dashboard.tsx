@@ -87,15 +87,15 @@ export default function Dashboard() {
 
       <div className="p-4 space-y-6">
         {/* Points Card */}
-        <Card className="bg-gradient-primary text-primary-foreground shadow-strong">
+        <Card className="bg-primary text-primary-foreground shadow-strong">
           <CardContent className="pt-6">
             <div className="text-center">
               <div className="flex items-center justify-center mb-2">
-                <Coins className="h-8 w-8 mr-2" />
-                <span className="text-2xl font-semibold">B-Perks Points</span>
+                <Coins className="h-8 w-8 mr-2 text-white" />
+                <span className="text-2xl font-semibold text-white">B-Perks Points</span>
               </div>
-              <div className="text-4xl font-bold mb-2">{user.points.toLocaleString()}</div>
-              <p className="text-primary-foreground/80">
+              <div className="text-4xl font-bold mb-2 text-white">{user.points.toLocaleString()}</div>
+              <p className="text-white/80">
                 Keep participating to earn more!
               </p>
             </div>

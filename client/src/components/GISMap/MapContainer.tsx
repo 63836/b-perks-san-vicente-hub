@@ -393,9 +393,8 @@ const GISMap: React.FC<GISMapProps> = ({ className }) => {
             <LocationMarker />
           </LayersControl.Overlay>
 
-          <LayersControl.Overlay checked name="Community Reports & Events">
+          <LayersControl.Overlay checked name="Community Reports">
             <>
-              {/* Group all reports */}
               {mapData.reports.length > 0 && (
                 <Marker
                   position={[16.3954, 120.5968]}
@@ -419,8 +418,11 @@ const GISMap: React.FC<GISMapProps> = ({ className }) => {
                   </Popup>
                 </Marker>
               )}
-              
-              {/* Group all events */}
+            </>
+          </LayersControl.Overlay>
+
+          <LayersControl.Overlay checked name="Events">
+            <>
               {mapData.events.length > 0 && (
                 <Marker
                   position={[16.3954, 120.5975]}
@@ -447,7 +449,7 @@ const GISMap: React.FC<GISMapProps> = ({ className }) => {
             </>
           </LayersControl.Overlay>
 
-          <LayersControl.Overlay name="Purok Boundaries">
+          <LayersControl.Overlay checked name="Purok Boundaries & Safety Areas">
             <>
               {mapData.puroks.map((purok) => (
                 <Polygon
@@ -476,11 +478,6 @@ const GISMap: React.FC<GISMapProps> = ({ className }) => {
                   </Popup>
                 </Polygon>
               ))}
-            </>
-          </LayersControl.Overlay>
-
-          <LayersControl.Overlay name="Safety Areas">
-            <>
               {mapData.safetyAreas.map((area) => (
                 <Polygon
                   key={area.id}

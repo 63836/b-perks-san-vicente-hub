@@ -139,3 +139,21 @@ All colors MUST be HSL.
     @apply bg-background text-foreground;
   }
 }
+
+/* Gradient Utilities */
+@layer components {
+  .bg-gradient-primary {
+    background: var(--gradient-primary);
+    color: hsl(var(--primary-foreground));
+  }
+
+  .bg-gradient-secondary {
+    background: var(--gradient-secondary);
+    color: hsl(var(--secondary-foreground));
+  }
+
+  .bg-gradient-gold {
+    background: var(--gradient-gold);
+    color: hsl(var(--foreground));
+  }
+}
