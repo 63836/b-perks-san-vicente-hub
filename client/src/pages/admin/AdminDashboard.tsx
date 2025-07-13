@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useLocation } from 'wouter';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Header, BottomNavigation } from '@/components/ui/navigation';
+import { Header } from '@/components/ui/navigation';
 import { authStore } from '@/store/authStore';
 import { useToast } from '@/hooks/use-toast';
 import { 
@@ -54,7 +54,7 @@ export default function AdminDashboard() {
   if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-background pb-20">
+    <div className="min-h-screen bg-background">
       <Header title="Admin Dashboard" />
 
       <div className="p-4 space-y-6">
@@ -123,7 +123,7 @@ export default function AdminDashboard() {
             <Button 
               className="w-full justify-start" 
               variant="outline"
-              onClick={() => navigate('/admin/create-event')}
+              onClick={() => setLocation('/admin/create-event')}
             >
               <Calendar className="h-4 w-4 mr-2" />
               Create Event
@@ -132,7 +132,7 @@ export default function AdminDashboard() {
             <Button 
               className="w-full justify-start" 
               variant="outline"
-              onClick={() => navigate('/admin/add-reward')}
+              onClick={() => setLocation('/admin/add-reward')}
             >
               <Gift className="h-4 w-4 mr-2" />
               Add Reward
@@ -141,7 +141,7 @@ export default function AdminDashboard() {
             <Button 
               className="w-full justify-start" 
               variant="outline"
-              onClick={() => navigate('/admin/reports')}
+              onClick={() => setLocation('/admin/reports')}
             >
               <FileX className="h-4 w-4 mr-2" />
               Review Reports
@@ -200,7 +200,7 @@ export default function AdminDashboard() {
         </Button>
       </div>
 
-      <BottomNavigation isAdmin={true} />
+
     </div>
   );
 }
