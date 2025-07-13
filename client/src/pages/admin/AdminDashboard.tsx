@@ -132,19 +132,10 @@ export default function AdminDashboard() {
             <Button 
               className="w-full justify-start" 
               variant="outline"
-              onClick={() => setLocation('/admin/add-reward')}
+              onClick={() => setLocation('/admin/manage-rewards')}
             >
               <Gift className="h-4 w-4 mr-2" />
-              Add Reward
-            </Button>
-            
-            <Button 
-              className="w-full justify-start" 
-              variant="outline"
-              onClick={() => setLocation('/admin/ongoing-events')}
-            >
-              <Calendar className="h-4 w-4 mr-2" />
-              Ongoing Events
+              Manage Rewards
             </Button>
             
             <Button 

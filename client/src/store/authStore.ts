@@ -1,4 +1,4 @@
-import { User } from '@/types';
+import { User } from '@shared/schema';
 
 class AuthStore {
   private static instance: AuthStore;
@@ -32,7 +32,7 @@ class AuthStore {
       // Initialize with default admin if no users exist
       if (this.users.length === 0) {
         this.users = [{
-          id: 'admin-1',
+          id: 1,
           name: 'Barangay Admin',
           age: 35,
           phoneNumber: '+639123456789',
@@ -40,7 +40,7 @@ class AuthStore {
           password: 'admin123',
           points: 0,
           isAdmin: true,
-          createdAt: new Date().toISOString()
+          createdAt: new Date()
         }];
         this.saveToStorage();
       }
@@ -70,10 +70,10 @@ class AuthStore {
 
     const newUser: User = {
       ...userData,
-      id: `user-${Date.now()}`,
+      id: Date.now(),
       points: 0,
       isAdmin: false,
-      createdAt: new Date().toISOString()
+      createdAt: new Date()
     };
 
     this.users.push(newUser);

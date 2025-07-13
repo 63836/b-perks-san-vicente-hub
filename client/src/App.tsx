@@ -1,8 +1,9 @@
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClientProvider } from "@tanstack/react-query";
 import { Router, Route, Switch } from "wouter";
+import { queryClient } from "./lib/queryClient";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
@@ -15,13 +16,11 @@ import Report from "./pages/Report";
 import Notifications from "./pages/Notifications";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import CreateAnnouncement from "./pages/admin/CreateAnnouncement";
-import AddReward from "./pages/admin/AddReward";
+import ManageRewards from "./pages/admin/ManageRewards";
 import OngoingEvents from "./pages/admin/OngoingEvents";
 import ReviewReports from "./pages/admin/ReviewReports";
 import ManagePuroks from "./pages/admin/ManagePuroks";
 import NotFound from "./pages/NotFound";
-
-const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -43,7 +42,7 @@ const App = () => (
           <Route path="/admin" component={AdminDashboard} />
           <Route path="/admin/dashboard" component={AdminDashboard} />
           <Route path="/admin/create-announcement" component={CreateAnnouncement} />
-          <Route path="/admin/add-reward" component={AddReward} />
+          <Route path="/admin/manage-rewards" component={ManageRewards} />
           <Route path="/admin/ongoing-events" component={OngoingEvents} />
           <Route path="/admin/reports" component={ReviewReports} />
           <Route path="/admin/manage-puroks" component={ManagePuroks} />
