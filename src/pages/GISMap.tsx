@@ -1,7 +1,13 @@
+import { useState } from 'react';
 import { Header, BottomNavigation } from '@/components/ui/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, Layers, Navigation, Shield } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
+import GISMap from '@/components/GISMap/MapContainer';
+import { offlineMapManager, BARANGAY_BOUNDS } from '@/utils/offlineMap';
+import { MapPin, Layers, Navigation, Shield, Download, Trash2 } from 'lucide-react';
 
 // Sample data for map layers
 const mapLayers = [
@@ -9,7 +15,8 @@ const mapLayers = [
   { id: 'satellite', name: 'Satellite View', active: false, type: 'Base Layer' },
   { id: 'reports', name: 'Community Reports', active: true, type: 'Data Layer' },
   { id: 'events', name: 'Event Locations', active: true, type: 'Data Layer' },
-  { id: 'safety', name: 'Safety Levels', active: false, type: 'Data Layer' }
+  { id: 'safety', name: 'Safety Levels', active: false, type: 'Data Layer' },
+  { id: 'puroks', name: 'Purok Boundaries', active: false, type: 'Data Layer' }
 ];
 
 const safetyLevels = [
@@ -20,6 +27,12 @@ const safetyLevels = [
 ];
 
 export default function GISMap() {
+  const [activeLayersState, setActiveLayersState] = useState(
+    mapLayers.reduce((acc, layer) => ({ ...acc, [layer.id]: layer.active }), {})
+  );
+  const [isDownloadingTiles, setIsDownloadingTiles] = useState(false);
+  const [cacheSize, setCacheSize] = useState(0);
+
   const getSafetyColor = (level: string) => {
     switch (level) {
       case 'high': return 'bg-success';
@@ -29,41 +42,111 @@ export default function GISMap() {
     }
   };
 
+  const handleLayerToggle = (layerId: string) => {
+    setActiveLayersState(prev => ({
+      ...prev,
+      [layerId]: !prev[layerId]
+    }));
+  };
+
+  const handleDownloadOfflineMaps = async () => {
+    setIsDownloadingTiles(true);
+    try {
+      await offlineMapManager.cacheTilesForArea(
+        BARANGAY_BOUNDS,
+        12, // min zoom
+        18  // max zoom
+      );
+      
+      const newCacheSize = await offlineMapManager.getCacheSize();
+      setCacheSize(newCacheSize);
+      
+      alert(`Successfully cached map tiles for offline use! (${newCacheSize} tiles)`);
+    } catch (error) {
+      console.error('Failed to download offline maps:', error);
+      alert('Failed to download offline maps. Please check your internet connection and try again.');
+    } finally {
+      setIsDownloadingTiles(false);
+    }
+  };
+
+  const handleClearCache = async () => {
+    try {
+      await offlineMapManager.clearCache();
+      setCacheSize(0);
+      alert('Map cache cleared successfully!');
+    } catch (error) {
+      console.error('Failed to clear cache:', error);
+      alert('Failed to clear cache.');
+    }
+  };
+
+  // Load cache size on component mount
+  useState(() => {
+    offlineMapManager.getCacheSize().then(setCacheSize);
+  });
+
   return (
     <div className="min-h-screen bg-background pb-20">
-      <Header title="Community Map" />
+      <Header title="Community GIS Map" />
 
       <div className="p-4 space-y-6">
-        {/* Map Container */}
+        {/* Interactive Map */}
         <Card>
           <CardContent className="p-0">
-            <div className="aspect-square bg-muted rounded-lg flex items-center justify-center relative overflow-hidden">
-              {/* Mock Map Interface */}
-              <div className="absolute inset-0 bg-gradient-to-br from-secondary/20 to-primary/20"></div>
-              
-              {/* Map Placeholder */}
-              <div className="text-center z-10">
-                <MapPin className="h-16 w-16 mx-auto text-primary mb-4" />
-                <h3 className="text-lg font-semibold mb-2">Offline Map</h3>
-                <p className="text-sm text-muted-foreground">
-                  Barangay San Vicente, Baguio City
+            <div className="h-96 rounded-lg overflow-hidden">
+              <GISMap className="h-full w-full" />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Offline Map Management */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <Download className="h-5 w-5 mr-2" />
+              Offline Maps
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-medium text-sm">Cache Status</p>
+                <p className="text-xs text-muted-foreground">
+                  {cacheSize > 0 ? `${cacheSize} tiles cached` : 'No tiles cached'}
                 </p>
               </div>
+              <Badge variant={cacheSize > 0 ? 'default' : 'outline'}>
+                {cacheSize > 0 ? 'Available' : 'Not Available'}
+              </Badge>
+            </div>
 
-              {/* Mock Map Controls */}
-              <div className="absolute top-4 right-4 space-y-2">
-                <div className="bg-card p-2 rounded shadow-medium">
-                  <Navigation className="h-5 w-5" />
-                </div>
-                <div className="bg-card p-2 rounded shadow-medium">
-                  <Layers className="h-5 w-5" />
-                </div>
-              </div>
+            <div className="flex gap-2">
+              <Button
+                onClick={handleDownloadOfflineMaps}
+                disabled={isDownloadingTiles}
+                className="flex-1"
+                size="sm"
+              >
+                <Download className="h-4 w-4 mr-2" />
+                {isDownloadingTiles ? 'Downloading...' : 'Download for Offline'}
+              </Button>
+              
+              {cacheSize > 0 && (
+                <Button
+                  onClick={handleClearCache}
+                  variant="outline"
+                  size="sm"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
 
-              {/* Mock Location Dot */}
-              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                <div className="w-4 h-4 bg-primary rounded-full border-2 border-background animate-pulse"></div>
-              </div>
+            <div className="text-xs text-muted-foreground">
+              <p>• Downloads map tiles for Barangay San Vicente area</p>
+              <p>• Enables map viewing without internet connection</p>
+              <p>• Cache expires after 7 days</p>
             </div>
           </CardContent>
         </Card>
@@ -83,15 +166,21 @@ export default function GISMap() {
                   <p className="font-medium text-sm">{layer.name}</p>
                   <p className="text-xs text-muted-foreground">{layer.type}</p>
                 </div>
-                <Badge variant={layer.active ? 'default' : 'outline'}>
-                  {layer.active ? 'ON' : 'OFF'}
-                </Badge>
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    checked={activeLayersState[layer.id]}
+                    onCheckedChange={() => handleLayerToggle(layer.id)}
+                  />
+                  <Label className="text-xs">
+                    {activeLayersState[layer.id] ? 'ON' : 'OFF'}
+                  </Label>
+                </div>
               </div>
             ))}
           </CardContent>
         </Card>
 
-        {/* Safety Levels */}
+        {/* Purok Safety Levels */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center">
@@ -119,22 +208,61 @@ export default function GISMap() {
           <CardHeader>
             <CardTitle>Map Legend</CardTitle>
           </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="flex items-center space-x-2">
+                <div className="w-4 h-4 bg-blue-500 rounded-full"></div>
+                <span className="text-sm">Current Location</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <div className="w-4 h-4 bg-red-500 rounded-full"></div>
+                <span className="text-sm">Community Reports</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <div className="w-4 h-4 bg-amber-500 rounded-full"></div>
+                <span className="text-sm">Event Locations</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <div className="w-4 h-4 bg-green-500 rounded-full"></div>
+                <span className="text-sm">Safe Areas</span>
+              </div>
+            </div>
+            
+            <div className="pt-2 border-t">
+              <p className="text-xs text-muted-foreground mb-2">Purok Safety Levels:</p>
+              <div className="flex space-x-4">
+                <div className="flex items-center space-x-1">
+                  <div className="w-3 h-3 bg-green-500"></div>
+                  <span className="text-xs">High</span>
+                </div>
+                <div className="flex items-center space-x-1">
+                  <div className="w-3 h-3 bg-yellow-500"></div>
+                  <span className="text-xs">Medium</span>
+                </div>
+                <div className="flex items-center space-x-1">
+                  <div className="w-3 h-3 bg-red-500"></div>
+                  <span className="text-xs">Low</span>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Map Controls Info */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <Navigation className="h-5 w-5 mr-2" />
+              Map Controls
+            </CardTitle>
+          </CardHeader>
           <CardContent className="space-y-2">
-            <div className="flex items-center space-x-3">
-              <div className="w-4 h-4 bg-primary rounded-full"></div>
-              <span className="text-sm">Current Location</span>
-            </div>
-            <div className="flex items-center space-x-3">
-              <div className="w-4 h-4 bg-destructive rounded-full"></div>
-              <span className="text-sm">Report Locations</span>
-            </div>
-            <div className="flex items-center space-x-3">
-              <div className="w-4 h-4 bg-accent rounded-full"></div>
-              <span className="text-sm">Event Locations</span>
-            </div>
-            <div className="flex items-center space-x-3">
-              <div className="w-4 h-4 bg-success rounded-full"></div>
-              <span className="text-sm">Safe Areas</span>
+            <div className="text-sm space-y-1">
+              <p>• <strong>Zoom:</strong> Use + / - buttons or mouse wheel</p>
+              <p>• <strong>Pan:</strong> Click and drag to move around</p>
+              <p>• <strong>Layers:</strong> Use layer control (top-left) to toggle visibility</p>
+              <p>• <strong>Location:</strong> Click markers for detailed information</p>
+              <p>• <strong>Offline:</strong> Download tiles for offline access</p>
             </div>
           </CardContent>
         </Card>
