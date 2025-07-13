@@ -23,8 +23,8 @@ export default function AdminDashboard() {
 
   // Mock admin data
   const adminStats = {
-    totalUsers: 156,
-    pendingReports: 8,
+    totalUsers: 0,
+    pendingReports: 0,
     activeEvents: 3,
     totalRewards: 12
   };
@@ -123,10 +123,10 @@ export default function AdminDashboard() {
             <Button 
               className="w-full justify-start" 
               variant="outline"
-              onClick={() => setLocation('/admin/create-event')}
+              onClick={() => setLocation('/admin/ongoing-events')}
             >
               <Calendar className="h-4 w-4 mr-2" />
-              Create Event
+              Ongoing Events
             </Button>
             
             <Button 

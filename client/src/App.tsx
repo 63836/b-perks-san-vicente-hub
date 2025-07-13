@@ -14,6 +14,10 @@ import Rewards from "./pages/Rewards";
 import Report from "./pages/Report";
 import Notifications from "./pages/Notifications";
 import AdminDashboard from "./pages/admin/AdminDashboard";
+import CreateAnnouncement from "./pages/admin/CreateAnnouncement";
+import AddReward from "./pages/admin/AddReward";
+import OngoingEvents from "./pages/admin/OngoingEvents";
+import ReviewReports from "./pages/admin/ReviewReports";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -36,6 +40,11 @@ const App = () => (
           <Route path="/report" component={Report} />
           <Route path="/notifications" component={Notifications} />
           <Route path="/admin" component={AdminDashboard} />
+          <Route path="/admin/dashboard" component={AdminDashboard} />
+          <Route path="/admin/create-announcement" component={CreateAnnouncement} />
+          <Route path="/admin/add-reward" component={AddReward} />
+          <Route path="/admin/ongoing-events" component={OngoingEvents} />
+          <Route path="/admin/reports" component={ReviewReports} />
           <Route component={NotFound} />
         </Switch>
       </Router>
