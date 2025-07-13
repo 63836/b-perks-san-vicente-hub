@@ -1,11 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMap, LayersControl, Circle, Polygon } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, useMap, Circle, Polygon } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, Download, Wifi, WifiOff } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
+import { MapPin, Download, Wifi, WifiOff, Layers, Map, Navigation, AlertTriangle } from 'lucide-react';
 
 // Fix for default markers in React Leaflet
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -339,6 +341,14 @@ const GISMap: React.FC<GISMapProps> = ({ className }) => {
   const [isDownloading, setIsDownloading] = useState(false);
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
   const [mapData] = useState<MapData>(sampleMapData);
+  const [baseLayer, setBaseLayer] = useState<'street' | 'satellite'>('street');
+  const [layers, setLayers] = useState({
+    currentLocation: true,
+    reports: true,
+    events: true,
+    safetyAreas: true,
+    puroks: true
+  });
 
   useEffect(() => {
     const handleOnline = () => setIsOffline(false);
