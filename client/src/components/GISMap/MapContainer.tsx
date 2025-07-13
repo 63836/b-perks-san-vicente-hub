@@ -500,53 +500,55 @@ const GISMap: React.FC<GISMapProps> = ({ className, activeLayersState = {} }) =>
           </>
         )}
 
-        {/* Safety Level Visualization - Yellow circles around reports and red overlaps */}
+        {/* Safety Level Visualization - Yellow circles with red overlapping areas */}
         {layers.safetyAreas && (
           <>
-            {/* Get list of overlapping report IDs */}
-            {(() => {
-              const overlappingIds = new Set();
-              overlappingReports.forEach(overlap => {
-                overlappingIds.add(overlap.report1.id);
-                overlappingIds.add(overlap.report2.id);
-              });
+            {/* Yellow circles around each report (base layer) */}
+            {mapData.reports.map((report) => (
+              <Circle
+                key={`safety-yellow-${report.id}`}
+                center={[report.lat, report.lng]}
+                radius={90}
+                pathOptions={{
+                  color: '#eab308', // yellow
+                  fillColor: '#eab308',
+                  fillOpacity: 0.15,
+                  weight: 2,
+                  opacity: 0.8
+                }}
+              />
+            ))}
+
+            {/* Red overlay circles only for overlapping areas */}
+            {overlappingReports.map((overlap, index) => {
+              // Calculate the midpoint between the two overlapping reports
+              const midLat = (overlap.report1.lat + overlap.report2.lat) / 2;
+              const midLng = (overlap.report1.lng + overlap.report2.lng) / 2;
+              
+              // Calculate the distance between reports
+              const distance = calculateDistance(
+                overlap.report1.lat, overlap.report1.lng,
+                overlap.report2.lat, overlap.report2.lng
+              );
+              
+              // Calculate the radius of the overlap area (smaller circle representing intersection)
+              const overlapRadius = Math.max(10, (90 - distance/2)); // Minimum 10m radius
               
               return (
-                <>
-                  {/* Yellow circles for non-overlapping reports */}
-                  {mapData.reports.filter(report => !overlappingIds.has(report.id)).map((report) => (
-                    <Circle
-                      key={`safety-yellow-${report.id}`}
-                      center={[report.lat, report.lng]}
-                      radius={90}
-                      pathOptions={{
-                        color: '#eab308', // yellow
-                        fillColor: '#eab308',
-                        fillOpacity: 0.15,
-                        weight: 2,
-                        opacity: 0.8
-                      }}
-                    />
-                  ))}
-
-                  {/* Red circles for overlapping reports */}
-                  {mapData.reports.filter(report => overlappingIds.has(report.id)).map((report) => (
-                    <Circle
-                      key={`safety-red-${report.id}`}
-                      center={[report.lat, report.lng]}
-                      radius={90}
-                      pathOptions={{
-                        color: '#ef4444', // red
-                        fillColor: '#ef4444',
-                        fillOpacity: 0.3,
-                        weight: 3,
-                        opacity: 1
-                      }}
-                    />
-                  ))}
-                </>
+                <Circle
+                  key={`overlap-${index}`}
+                  center={[midLat, midLng]}
+                  radius={overlapRadius}
+                  pathOptions={{
+                    color: '#ef4444', // red
+                    fillColor: '#ef4444',
+                    fillOpacity: 0.4,
+                    weight: 3,
+                    opacity: 1
+                  }}
+                />
               );
-            })()}
+            })}
           </>
         )}
 
