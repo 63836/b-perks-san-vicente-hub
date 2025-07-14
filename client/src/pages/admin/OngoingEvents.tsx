@@ -208,6 +208,7 @@ export default function OngoingEvents() {
       })
     }).then(() => {
       queryClient.invalidateQueries({ queryKey: ['/api/events', selectedEvent?.id, 'participants'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/events'] });
       toast({
         title: "Participant Declined",
         description: "Participant has been declined.",
@@ -278,7 +279,7 @@ export default function OngoingEvents() {
                 </div>
               )}
 
-              {(selectedParticipant.status === 'participated' || selectedParticipant.status === 'registered') && selectedParticipant.status !== 'approved' && selectedParticipant.status !== 'declined' && (
+              {selectedParticipant.status !== 'approved' && selectedParticipant.status !== 'declined' && (
                 <div className="flex space-x-2">
                   <Button 
                     onClick={() => handleGrantPoints(selectedParticipant.id, selectedEvent.id, selectedEvent.pointsReward)}
@@ -302,7 +303,7 @@ export default function OngoingEvents() {
               {selectedParticipant.status === 'approved' && (
                 <div className="flex space-x-2">
                   <Button 
-                    className="flex-1"
+                    className="flex-1 bg-green-100 text-green-800"
                     disabled={true}
                     variant="outline"
                   >
@@ -311,7 +312,7 @@ export default function OngoingEvents() {
                   </Button>
                   <Button 
                     variant="outline"
-                    className="flex-1"
+                    className="flex-1 opacity-50"
                     disabled={true}
                   >
                     <XCircle className="h-4 w-4 mr-2" />
@@ -323,7 +324,7 @@ export default function OngoingEvents() {
               {selectedParticipant.status === 'declined' && (
                 <div className="flex space-x-2">
                   <Button 
-                    className="flex-1"
+                    className="flex-1 opacity-50"
                     disabled={true}
                     variant="outline"
                   >
@@ -332,7 +333,7 @@ export default function OngoingEvents() {
                   </Button>
                   <Button 
                     variant="outline"
-                    className="flex-1"
+                    className="flex-1 bg-red-100 text-red-800"
                     disabled={true}
                   >
                     <XCircle className="h-4 w-4 mr-2" />

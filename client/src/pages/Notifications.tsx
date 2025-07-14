@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { Header, BottomNavigation } from '@/components/ui/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -19,6 +20,16 @@ export default function Notifications() {
   const { data: notifications = [], isLoading } = useQuery<NewsAlert[]>({
     queryKey: ['/api/news'],
   });
+
+  // Mark all notifications as read when component mounts
+  useEffect(() => {
+    if (notifications.length > 0) {
+      // Clear notification count when user views the notifications page
+      import('@/store/notificationStore').then(({ notificationStore }) => {
+        notificationStore.clearNotifications();
+      });
+    }
+  }, [notifications.length]);
   const formatTimestamp = (timestamp: string) => {
     const now = new Date();
     const notificationTime = new Date(timestamp);
@@ -47,7 +58,16 @@ export default function Notifications() {
     }
   };
 
-  const unreadCount = notifications.length;
+  // Use notification store for unread count instead of all notifications
+  const [unreadCount, setUnreadCount] = useState(0);
+  
+  useEffect(() => {
+    import('@/store/notificationStore').then(({ notificationStore }) => {
+      setUnreadCount(notificationStore.getCount());
+      const unsubscribe = notificationStore.subscribe(setUnreadCount);
+      return unsubscribe;
+    });
+  }, []);
 
   return (
     <div className="min-h-screen bg-background pb-20">

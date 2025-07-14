@@ -70,16 +70,24 @@ export default function Rewards() {
       method: 'POST',
       body: JSON.stringify({ userId: user?.id }),
     }),
-    onSuccess: () => {
+    onSuccess: async (claimData) => {
       // Invalidate multiple queries to refresh UI
       queryClient.invalidateQueries({ queryKey: ['/api/users', user?.id, 'reward-claims'] });
       queryClient.invalidateQueries({ queryKey: ['/api/rewards'] });
       queryClient.invalidateQueries({ queryKey: ['/api/users', user?.id] });
       queryClient.invalidateQueries({ queryKey: ['/api/users', user?.id, 'transactions'] });
       
-      // Update local user state
-      const updatedUser = authStore.getCurrentUser();
-      setUser(updatedUser);
+      // Force refresh user data from server
+      try {
+        const response = await fetch(`/api/users/${user?.id}`);
+        if (response.ok) {
+          const updatedUserData = await response.json();
+          authStore.setCurrentUser(updatedUserData);
+          setUser(updatedUserData);
+        }
+      } catch (error) {
+        console.error('Failed to refresh user data:', error);
+      }
       
       toast({
         title: "Success!",
