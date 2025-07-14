@@ -98,7 +98,7 @@ export const newsAlerts = pgTable("news_alerts", {
 export const transactions = pgTable("transactions", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").notNull(),
-  type: text("type").notNull(), // earned, redeemed
+  type: text("type").notNull(), // earned, redeemed, report, event
   amount: integer("amount").notNull(),
   description: text("description").notNull(),
   eventId: integer("event_id"),

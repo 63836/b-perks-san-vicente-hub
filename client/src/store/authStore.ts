@@ -88,7 +88,7 @@ class AuthStore {
   }
 
   async login(username: string, password: string): Promise<User> {
-    // Always try backend API first
+    // Always try backend API first and only use backend
     try {
       const response = await fetch('/api/auth/login', {
         method: 'POST',
@@ -100,7 +100,9 @@ class AuthStore {
         const data = await response.json();
         const user = data.user || data;
         this.currentUser = user;
-        this.saveToStorage();
+        // Clear any old localStorage data that might have timestamp IDs
+        localStorage.removeItem('b-perks-users');
+        localStorage.setItem('b-perks-current-user', JSON.stringify(user));
         console.log('Backend login successful, user ID:', user.id);
         return user;
       } else {
@@ -120,6 +122,7 @@ class AuthStore {
   logout() {
     this.currentUser = null;
     localStorage.removeItem('b-perks-current-user');
+    localStorage.removeItem('b-perks-users'); // Clear old data
   }
 
   getCurrentUser(): User | null {

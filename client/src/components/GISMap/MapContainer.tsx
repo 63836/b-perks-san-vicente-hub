@@ -454,8 +454,8 @@ const GISMap: React.FC<GISMapProps> = ({ className, activeLayersState = {} }) =>
         // Convert real reports to map format
         const convertedReports = reports.map((report: any) => ({
           id: report.id.toString(),
-          lat: report.lat || 16.4023,
-          lng: report.lng || 120.5960,
+          lat: report.locationLat || 16.3954,
+          lng: report.locationLng || 120.5968,
           title: report.title,
           description: report.description,
           status: report.status || 'pending',

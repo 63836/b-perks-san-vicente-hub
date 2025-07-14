@@ -319,6 +319,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const eventId = parseInt(req.params.id);
       const { userId } = req.body;
       const participant = await storage.joinEvent(eventId, userId);
+      
+      // Create transaction for recent activity tracking
+      await storage.createTransaction({
+        userId: userId,
+        type: "event",
+        amount: 0,
+        description: `Registered for event: "${(await storage.getEvent(eventId))?.title || 'Event'}"`,
+        eventId: eventId,
+        rewardId: null,
+        claimId: null,
+      });
+      
       res.json(participant);
     } catch (error) {
       const message = error instanceof Error ? error.message : "Failed to join event";
@@ -406,6 +418,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
       
       const report = await storage.createReport(reportData);
+      
+      // Create transaction for recent activity tracking
+      await storage.createTransaction({
+        userId: reportData.userId,
+        type: "report",
+        amount: 0,
+        description: `Submitted report: "${reportData.title}"`,
+        eventId: null,
+        rewardId: null,
+        claimId: null,
+      });
+      
       res.json(report);
     } catch (error) {
       console.error("Error creating report:", error);
