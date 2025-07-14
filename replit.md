@@ -55,6 +55,7 @@ Authentication: Frontend-only mode, no backend database connections.
   - **Event Creation Enhancement**: Added comprehensive event creation with map-based location selection and date/time pickers
   - **Event Type Routing**: Events now correctly appear in Events section instead of News when created by admin
   - **GIS Map Integration**: Fixed GIS map component exports and location selection functionality for event creation
+  - **Map Location Selection Fix**: Resolved blank map issue in admin event creation by adding proper props interface and click handling
   - **Claim Code Display**: Resolved claim code visibility issues in reward history detailed view
 
 ## System Architecture

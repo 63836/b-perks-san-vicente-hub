@@ -404,13 +404,25 @@ const findOverlappingReports = (reports: MapData['reports']) => {
 interface GISMapProps {
   className?: string;
   activeLayersState?: Record<string, boolean>;
+  onLocationSelect?: (location: { lat: number; lng: number; address: string }) => void;
+  showLocationPicker?: boolean;
+  initialCenter?: [number, number];
+  initialZoom?: number;
 }
 
-const GISMap: React.FC<GISMapProps> = ({ className, activeLayersState = {} }) => {
+const GISMap: React.FC<GISMapProps> = ({ 
+  className, 
+  activeLayersState = {},
+  onLocationSelect,
+  showLocationPicker = false,
+  initialCenter = [16.3954, 120.5968], // Default to Barangay San Vicente
+  initialZoom = 15
+}) => {
   const [isDownloading, setIsDownloading] = useState(false);
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
   const [mapData, setMapData] = useState<MapData>(sampleMapData);
   const [realReports, setRealReports] = useState<any[]>([]);
+  const [selectedLocation, setSelectedLocation] = useState<[number, number] | null>(null);
   
   // Determine base layer from the activeLayersState
   let baseLayer = 'street';
@@ -513,13 +525,26 @@ const GISMap: React.FC<GISMapProps> = ({ className, activeLayersState = {} }) =>
 
 
 
+  const handleMapClick = (e: any) => {
+    if (showLocationPicker && onLocationSelect) {
+      const { lat, lng } = e.latlng;
+      setSelectedLocation([lat, lng]);
+      // Simple address based on coordinates (you could enhance this with reverse geocoding)
+      const address = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+      onLocationSelect({ lat, lng, address });
+    }
+  };
+
   return (
     <div className={`relative ${className}`}>
       <MapContainer
-        center={[16.3954, 120.5968]}
-        zoom={16}
+        center={initialCenter}
+        zoom={initialZoom}
         style={{ height: '100%', width: '100%' }}
         className="rounded-lg"
+        {...(showLocationPicker && { 
+          eventHandlers: { click: handleMapClick }
+        })}
       >
         {/* Base Layer - Always show one */}
         <TileLayer
@@ -658,6 +683,24 @@ const GISMap: React.FC<GISMapProps> = ({ className, activeLayersState = {} }) =>
             </Popup>
           </Marker>
         ))}
+
+        {/* Location picker marker */}
+        {showLocationPicker && selectedLocation && (
+          <Marker
+            position={selectedLocation}
+            icon={createCustomIcon('#3b82f6')}
+          >
+            <Popup>
+              <div>
+                <strong>Selected Location</strong>
+                <br />
+                <small>Lat: {selectedLocation[0].toFixed(6)}</small>
+                <br />
+                <small>Lng: {selectedLocation[1].toFixed(6)}</small>
+              </div>
+            </Popup>
+          </Marker>
+        )}
 
         {/* Removed polygon-based safety areas and puroks - using circles instead */}
 
