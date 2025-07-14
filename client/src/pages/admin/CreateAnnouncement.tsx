@@ -23,19 +23,40 @@ export default function CreateAnnouncement() {
     points: 0
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // TODO: Submit to backend
-    toast({
-      title: "Success",
-      description: `${formData.type === 'event' ? 'Event' : 'Announcement'} created successfully!`,
-    });
-    
-    // Add notification for users
-    notificationStore.addNotification();
-    
-    setLocation('/admin/dashboard');
+    try {
+      // Submit to backend
+      const response = await fetch('/api/news', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: formData.title,
+          content: formData.content,
+          type: formData.type,
+          authorId: 1 // Admin user ID
+        })
+      });
+      
+      if (!response.ok) throw new Error('Failed to create announcement');
+      
+      toast({
+        title: "Success",
+        description: `${formData.type === 'event' ? 'Event' : 'Announcement'} created successfully!`,
+      });
+      
+      // Add notification for users
+      notificationStore.addNotification();
+      
+      setLocation('/admin/dashboard');
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to create announcement. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {

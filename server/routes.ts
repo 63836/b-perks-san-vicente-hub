@@ -365,9 +365,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const updates = req.body;
       
       // Get existing participant to check if points were already awarded
-      const existingParticipant = await storage.getEventParticipants(0).then(participants => 
-        participants.find(p => p.id === participantId)
-      );
+      // We need to get all participants from all events to find the specific participant
+      const allEvents = await storage.getAllEvents();
+      let existingParticipant = null;
+      
+      for (const event of allEvents) {
+        const participants = await storage.getEventParticipants(event.id);
+        const found = participants.find(p => p.id === participantId);
+        if (found) {
+          existingParticipant = found;
+          break;
+        }
+      }
       
       if (!existingParticipant) {
         return res.status(404).json({ error: "Participant not found" });
@@ -398,6 +407,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
             claimId: null,
           });
         }
+      }
+      
+      // If declining participation, log transaction
+      if (updates.status === "declined") {
+        const event = await storage.getEvent(participant.eventId);
+        await storage.createTransaction({
+          userId: participant.userId,
+          type: "declined",
+          amount: 0,
+          description: `Participation declined for "${event?.title || 'Event'}"`,
+          eventId: participant.eventId,
+          rewardId: null,
+          claimId: null,
+        });
       }
       
       res.json(participant);

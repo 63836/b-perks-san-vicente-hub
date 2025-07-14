@@ -287,13 +287,7 @@ export default function ReviewReports() {
                       <Eye className="h-4 w-4 mr-2" />
                       View Details
                     </Button>
-                    <Button 
-                      variant="outline"
-                      onClick={() => handlePublishToNews(report)}
-                    >
-                      <Newspaper className="h-4 w-4 mr-2" />
-                      Publish
-                    </Button>
+
                   </div>
                 </div>
               </CardContent>
