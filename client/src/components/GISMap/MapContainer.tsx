@@ -408,6 +408,7 @@ interface GISMapProps {
   showLocationPicker?: boolean;
   initialCenter?: [number, number];
   initialZoom?: number;
+  showMarkerAtCenter?: boolean; // Show a marker at the center for preview
 }
 
 const GISMap: React.FC<GISMapProps> = ({ 
@@ -416,7 +417,8 @@ const GISMap: React.FC<GISMapProps> = ({
   onLocationSelect,
   showLocationPicker = false,
   initialCenter = [16.3954, 120.5968], // Default to Barangay San Vicente
-  initialZoom = 15
+  initialZoom = 15,
+  showMarkerAtCenter = false
 }) => {
   const [isDownloading, setIsDownloading] = useState(false);
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
@@ -697,6 +699,24 @@ const GISMap: React.FC<GISMapProps> = ({
                 <small>Lat: {selectedLocation[0].toFixed(6)}</small>
                 <br />
                 <small>Lng: {selectedLocation[1].toFixed(6)}</small>
+              </div>
+            </Popup>
+          </Marker>
+        )}
+
+        {/* Preview marker at center */}
+        {showMarkerAtCenter && (
+          <Marker
+            position={initialCenter}
+            icon={createCustomIcon('#ef4444')}
+          >
+            <Popup>
+              <div>
+                <strong>Event Location</strong>
+                <br />
+                <small>Lat: {initialCenter[0].toFixed(6)}</small>
+                <br />
+                <small>Lng: {initialCenter[1].toFixed(6)}</small>
               </div>
             </Popup>
           </Marker>

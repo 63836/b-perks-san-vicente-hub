@@ -195,22 +195,48 @@ export default function CreateAnnouncement() {
                 <>
                   <div>
                     <Label htmlFor="location">Event Location</Label>
-                    <div className="flex items-center space-x-2">
-                      <Input
-                        id="location"
-                        value={formData.location}
-                        onChange={(e) => setFormData(prev => ({ ...prev, location: e.target.value }))}
-                        placeholder="Click to set location on map"
-                        readOnly
-                      />
-                      <Button 
-                        type="button" 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => setShowMapDialog(true)}
-                      >
-                        <MapPin className="h-4 w-4" />
-                      </Button>
+                    <div className="border rounded-lg p-4 space-y-3">
+                      {!formData.location ? (
+                        <div className="text-center py-8">
+                          <MapPin className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
+                          <p className="text-sm text-muted-foreground mb-3">No location selected</p>
+                          <Button 
+                            type="button" 
+                            variant="outline" 
+                            onClick={() => setShowMapDialog(true)}
+                          >
+                            <MapPin className="h-4 w-4 mr-2" />
+                            Select Location on Map
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="text-sm font-medium">Selected Location:</p>
+                              <p className="text-xs text-muted-foreground">{formData.location}</p>
+                            </div>
+                            <Button 
+                              type="button" 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => setShowMapDialog(true)}
+                            >
+                              <MapPin className="h-4 w-4 mr-1" />
+                              Change
+                            </Button>
+                          </div>
+                          <div className="h-32 w-full rounded border overflow-hidden">
+                            <GISMap 
+                              initialCenter={formData.coordinates ? [formData.coordinates.lat, formData.coordinates.lng] : [16.4074, 120.5960]}
+                              initialZoom={16}
+                              className="h-full w-full"
+                              activeLayersState={{}}
+                              showMarkerAtCenter={true}
+                            />
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
 
