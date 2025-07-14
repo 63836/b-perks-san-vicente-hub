@@ -11,7 +11,7 @@ import { Header } from '@/components/ui/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { notificationStore } from '@/store/notificationStore';
 import { ArrowLeft, Upload, MapPin, Coins, Calendar } from 'lucide-react';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -119,6 +119,18 @@ export default function CreateAnnouncement() {
       location: location.address,
       coordinates: { lat: location.lat, lng: location.lng }
     }));
+  };
+
+  // Map click handler component  
+  const MapClickHandler = () => {
+    useMapEvents({
+      click(e) {
+        const { lat, lng } = e.latlng;
+        const address = `Event Location: ${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+        handleLocationSelect({ lat, lng, address });
+      },
+    });
+    return null;
   };
 
   return (
@@ -338,18 +350,12 @@ export default function CreateAnnouncement() {
                   zoom={15}
                   style={{ height: '100%', width: '100%' }}
                   className="rounded-lg cursor-crosshair"
-                  eventHandlers={{
-                    click: (e: any) => {
-                      const { lat, lng } = e.latlng;
-                      const address = `Event Location: ${lat.toFixed(4)}, ${lng.toFixed(4)}`;
-                      handleLocationSelect({ lat, lng, address });
-                    }
-                  }}
                 >
                   <TileLayer
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                   />
+                  <MapClickHandler />
                   {formData.coordinates && (
                     <Marker position={[formData.coordinates.lat, formData.coordinates.lng]}>
                       <Popup>

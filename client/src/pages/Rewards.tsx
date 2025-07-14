@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { Gift, ShoppingCart, Star, History, Copy, Check, Clock } from 'lucide-react';
+import { Gift, ShoppingCart, Star, History } from 'lucide-react';
 import { authStore } from '@/store/authStore';
 import { apiRequest } from '@/lib/queryClient';
 
@@ -23,24 +23,11 @@ interface Reward {
   createdAt: string;
 }
 
-interface RewardClaim {
-  id: number;
-  userId: number;
-  rewardId: number;
-  claimCode: string;
-  status: 'unclaimed' | 'claimed' | 'expired';
-  claimedAt: string;
-  verifiedAt?: string;
-  verifiedBy?: number;
-  rewardTitle?: string; // Added by API
-}
-
 export default function Rewards() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [showHistory, setShowHistory] = useState(false);
-  const [selectedClaim, setSelectedClaim] = useState<RewardClaim | null>(null);
   const [user, setUser] = useState(authStore.getCurrentUser());
 
   useEffect(() => {
@@ -53,9 +40,9 @@ export default function Rewards() {
     queryKey: ['/api/rewards'],
   });
 
-  // Fetch user's reward claims
-  const { data: userClaims = [] } = useQuery<RewardClaim[]>({
-    queryKey: ['/api/users', user?.id, 'reward-claims'],
+  // Fetch user's transactions (for reward history)
+  const { data: userTransactions = [] } = useQuery({
+    queryKey: ['/api/users', user?.id, 'transactions'],
     enabled: !!user?.id,
   });
 
@@ -73,10 +60,9 @@ export default function Rewards() {
     }),
     onSuccess: async (claimData) => {
       // Invalidate multiple queries to refresh UI
-      queryClient.invalidateQueries({ queryKey: ['/api/users', user?.id, 'reward-claims'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/users', user?.id, 'transactions'] });
       queryClient.invalidateQueries({ queryKey: ['/api/rewards'] });
       queryClient.invalidateQueries({ queryKey: ['/api/users', user?.id] });
-      queryClient.invalidateQueries({ queryKey: ['/api/users', user?.id, 'transactions'] });
       
       // Force refresh user data from server
       try {
@@ -92,7 +78,7 @@ export default function Rewards() {
       
       toast({
         title: "Success!",
-        description: "Reward claimed successfully! Check your history for the claim code.",
+        description: "Reward claimed successfully! Check your history for the transaction record.",
       });
     },
     onError: (error: Error) => {
@@ -142,45 +128,6 @@ export default function Rewards() {
     redeemMutation.mutate(reward.id);
   };
 
-  const handleClaimClick = (claim: RewardClaim) => {
-    setSelectedClaim(claim);
-  };
-
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text);
-    toast({
-      title: "Copied!",
-      description: "Claim code copied to clipboard",
-    });
-  };
-
-  const getRewardTitle = (claim: RewardClaim) => {
-    // Use rewardTitle from API if available, otherwise fallback to rewards lookup
-    if (claim.rewardTitle) {
-      return claim.rewardTitle;
-    }
-    const reward = rewards.find(r => r.id === claim.rewardId);
-    return reward ? reward.title : 'Unknown Reward';
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'unclaimed': return 'bg-yellow-100 text-yellow-800';
-      case 'claimed': return 'bg-green-100 text-green-800';
-      case 'expired': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'unclaimed': return <Clock className="h-4 w-4" />;
-      case 'claimed': return <Check className="h-4 w-4" />;
-      case 'expired': return <Clock className="h-4 w-4" />;
-      default: return <Clock className="h-4 w-4" />;
-    }
-  };
-
   if (!user) {
     return (
       <div className="min-h-screen bg-background pb-20">
@@ -204,29 +151,41 @@ export default function Rewards() {
       <Header title="Rewards Store" />
 
       <div className="p-4 space-y-6">
-        {/* Points Balance and History Button */}
-        <div className="flex items-center justify-between bg-gradient-secondary p-4 rounded-lg text-secondary-foreground">
-          <div>
-            <p className="text-sm opacity-80">Available Points</p>
-            <p className="text-2xl font-bold">{userInfo?.points || user.points}</p>
-          </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowHistory(true)}
-            className="bg-background/20 border-background/30 hover:bg-background/30"
-          >
-            <History className="h-4 w-4 mr-2" />
-            History
-          </Button>
-        </div>
+        {/* Points Display */}
+        <Card className="bg-gradient-to-r from-blue-500 to-purple-600 text-white">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center justify-between">
+              <div className="flex items-center">
+                <Star className="h-6 w-6 mr-2" />
+                Your Points
+              </div>
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => setShowHistory(true)}
+                className="bg-white/20 hover:bg-white/30 text-white border-white/30"
+              >
+                <History className="h-4 w-4 mr-1" />
+                History
+              </Button>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold">
+              {userInfo?.points || user?.points || 0}
+            </div>
+            <p className="text-blue-100 text-sm">
+              Points available for rewards
+            </p>
+          </CardContent>
+        </Card>
 
         {/* Category Filter */}
         <div className="flex gap-2 overflow-x-auto pb-2">
-          {categories.map((category) => (
+          {categories.map(category => (
             <Button
               key={category}
-              variant={selectedCategory === category ? 'default' : 'outline'}
+              variant={selectedCategory === category ? "default" : "outline"}
               size="sm"
               onClick={() => setSelectedCategory(category)}
               className="whitespace-nowrap"
@@ -237,40 +196,37 @@ export default function Rewards() {
         </div>
 
         {/* Rewards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4">
           {filteredRewards.map((reward) => {
             const isOutOfStock = reward.availableQuantity <= 0;
             const isLowStock = reward.availableQuantity <= 3 && reward.availableQuantity > 0;
             
             return (
-            <Card key={reward.id} className={isOutOfStock ? 'opacity-60' : ''}>
-              <CardHeader className="pb-3">
-                <div className="flex items-start justify-between">
-                  <CardTitle className="text-lg">{reward.title}</CardTitle>
-                  <Badge variant="secondary" className="bg-accent text-accent-foreground">
-                    {reward.pointsCost} pts
-                  </Badge>
-                </div>
-                <Badge variant="outline" className="w-fit">
-                  {reward.category}
-                </Badge>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {reward.imageUrl ? (
-                  <div className="aspect-video bg-muted rounded-lg overflow-hidden">
+            <Card 
+              key={reward.id} 
+              className={`${isOutOfStock ? 'opacity-60' : ''} hover:shadow-lg transition-shadow`}
+            >
+              <CardContent className="p-4">
+                {reward.imageUrl && (
+                  <div className="w-full h-32 bg-muted rounded-lg mb-3 overflow-hidden">
                     <img 
                       src={reward.imageUrl} 
                       alt={reward.title}
                       className="w-full h-full object-cover"
                     />
                   </div>
-                ) : (
-                  <div className="aspect-video bg-muted rounded-lg flex items-center justify-center">
-                    <Gift className="h-12 w-12 text-muted-foreground" />
-                  </div>
                 )}
                 
-                <p className="text-sm text-muted-foreground">
+                <div className="flex items-start justify-between mb-2">
+                  <h3 className="font-semibold text-lg line-clamp-2 flex-1">
+                    {reward.title}
+                  </h3>
+                  <Badge variant="secondary" className="ml-2 bg-gradient-gold text-white">
+                    {reward.pointsCost} pts
+                  </Badge>
+                </div>
+                
+                <p className="text-muted-foreground text-sm mb-3 line-clamp-2">
                   {reward.description}
                 </p>
 
@@ -327,91 +283,44 @@ export default function Rewards() {
             <DialogTitle>Reward History</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            {userClaims.length === 0 ? (
+            {userTransactions.filter(t => t.type === 'redeemed').length === 0 ? (
               <div className="text-center py-8">
                 <Gift className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                <p className="text-muted-foreground">No rewards claimed yet</p>
+                <p className="text-muted-foreground">No rewards redeemed yet</p>
               </div>
             ) : (
-              userClaims.map((claim) => (
-                <Card key={claim.id} className="cursor-pointer hover:bg-muted/50" onClick={() => handleClaimClick(claim)}>
-                  <CardContent className="p-4">
-                    <div className="flex justify-between items-start">
-                      <div className="flex-1">
-                        <h4 className="font-medium">{getRewardTitle(claim)}</h4>
-                        <p className="text-sm text-muted-foreground">
-                          Claimed: {claim.claimedAt ? new Date(claim.claimedAt).toLocaleDateString() : 'Unknown'}
-                        </p>
-                        <div className="flex items-center gap-2 mt-2">
-                          <Badge className={getStatusColor(claim.status)}>
-                            {getStatusIcon(claim.status)}
-                            <span className="ml-1 capitalize">{claim.status}</span>
-                          </Badge>
+              userTransactions
+                .filter(transaction => transaction.type === 'redeemed')
+                .map((transaction) => (
+                  <Card key={transaction.id}>
+                    <CardContent className="p-4">
+                      <div className="flex justify-between items-start">
+                        <div className="flex-1">
+                          <h4 className="font-medium">{transaction.description}</h4>
+                          <p className="text-sm text-muted-foreground">
+                            Redeemed: {new Date(transaction.timestamp).toLocaleDateString()}
+                          </p>
+                          <div className="flex items-center gap-2 mt-2">
+                            <Badge className="bg-red-100 text-red-800">
+                              <ShoppingCart className="h-3 w-3 mr-1" />
+                              <span className="ml-1">Redeemed</span>
+                            </Badge>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm font-medium text-red-600">
+                            {transaction.amount} pts
+                          </p>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Points used
+                          </p>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <p className="text-sm font-mono bg-gray-100 px-2 py-1 rounded">
-                          {claim.claimCode ? claim.claimCode.substring(0, 8) + '...' : 'No Code'}
-                        </p>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          Click to view
-                        </p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))
+                    </CardContent>
+                  </Card>
+                ))
             )}
           </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Claim Detail Dialog */}
-      <Dialog open={!!selectedClaim} onOpenChange={() => setSelectedClaim(null)}>
-        <DialogContent className="max-w-sm">
-          <DialogHeader>
-            <DialogTitle>Claim Details</DialogTitle>
-          </DialogHeader>
-          {selectedClaim && (
-            <div className="space-y-4">
-              <div>
-                <h4 className="font-medium mb-2">{getRewardTitle(selectedClaim)}</h4>
-                <div className="flex items-center gap-2 mb-3">
-                  <Badge className={getStatusColor(selectedClaim.status)}>
-                    {getStatusIcon(selectedClaim.status)}
-                    <span className="ml-1 capitalize">{selectedClaim.status}</span>
-                  </Badge>
-                </div>
-              </div>
-              
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <p className="text-sm font-medium mb-2">Claim Code</p>
-                <div className="flex items-center gap-2">
-                  <code className="flex-1 bg-white px-3 py-2 rounded border font-mono text-sm">
-                    {selectedClaim.claimCode || 'No code available'}
-                  </code>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    disabled={!selectedClaim.claimCode}
-                    onClick={() => selectedClaim.claimCode && copyToClipboard(selectedClaim.claimCode)}
-                  >
-                    <Copy className="h-4 w-4" />
-                  </Button>
-                </div>
-                <p className="text-xs text-muted-foreground mt-2">
-                  Show this code to the Barangay office to claim your reward
-                </p>
-              </div>
-
-              <div className="text-sm text-muted-foreground space-y-1">
-                <p>Claimed: {selectedClaim.claimedAt ? new Date(selectedClaim.claimedAt).toLocaleString() : 'Unknown'}</p>
-                {selectedClaim.verifiedAt && (
-                  <p>Verified: {new Date(selectedClaim.verifiedAt).toLocaleString()}</p>
-                )}
-              </div>
-            </div>
-          )}
         </DialogContent>
       </Dialog>
 
