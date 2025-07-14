@@ -71,7 +71,7 @@ USER ACCOUNTS:
 - Name: Leonne
 - Age: 20
 - Phone: +639669176096
-- Points: 50
+- Points: 0
 - Role: Resident
 - User ID: 40
 

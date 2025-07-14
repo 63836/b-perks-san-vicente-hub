@@ -11,7 +11,17 @@ import { Header } from '@/components/ui/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { notificationStore } from '@/store/notificationStore';
 import { ArrowLeft, Upload, MapPin, Coins, Calendar } from 'lucide-react';
-import { GISMap } from '@/components/GISMap';
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+
+// Fix for default markers in React Leaflet
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+});
 
 export default function CreateAnnouncement() {
   const [, setLocation] = useLocation();
@@ -25,8 +35,7 @@ export default function CreateAnnouncement() {
     points: 0,
     startDate: '',
     endDate: '',
-    locationLat: null as number | null,
-    locationLng: null as number | null
+    coordinates: null as { lat: number; lng: number } | null
   });
   const [showMapDialog, setShowMapDialog] = useState(false);
 
@@ -104,14 +113,12 @@ export default function CreateAnnouncement() {
     }
   };
 
-  const handleLocationSelect = (lat: number, lng: number, address: string) => {
+  const handleLocationSelect = (location: { lat: number; lng: number; address: string }) => {
     setFormData(prev => ({
       ...prev,
-      location: address,
-      locationLat: lat,
-      locationLng: lng
+      location: location.address,
+      coordinates: { lat: location.lat, lng: location.lng }
     }));
-    setShowMapDialog(false);
   };
 
   return (
@@ -227,13 +234,31 @@ export default function CreateAnnouncement() {
                             </Button>
                           </div>
                           <div className="h-32 w-full rounded border overflow-hidden">
-                            <GISMap 
-                              initialCenter={formData.coordinates ? [formData.coordinates.lat, formData.coordinates.lng] : [16.4074, 120.5960]}
-                              initialZoom={16}
-                              className="h-full w-full"
-                              activeLayersState={{}}
-                              showMarkerAtCenter={true}
-                            />
+                            <MapContainer
+                              center={formData.coordinates ? [formData.coordinates.lat, formData.coordinates.lng] : [16.4074, 120.5960]}
+                              zoom={16}
+                              style={{ height: '100%', width: '100%' }}
+                              className="rounded-lg"
+                              zoomControl={false}
+                              scrollWheelZoom={false}
+                              doubleClickZoom={false}
+                              dragging={false}
+                            >
+                              <TileLayer
+                                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                              />
+                              {formData.coordinates && (
+                                <Marker position={[formData.coordinates.lat, formData.coordinates.lng]}>
+                                  <Popup>
+                                    <div className="text-center">
+                                      <MapPin className="h-4 w-4 mx-auto mb-1" />
+                                      <strong>Event Location</strong>
+                                    </div>
+                                  </Popup>
+                                </Marker>
+                              )}
+                            </MapContainer>
                           </div>
                         </div>
                       )}
@@ -306,13 +331,69 @@ export default function CreateAnnouncement() {
                 Select Event Location
               </DialogTitle>
             </DialogHeader>
-            <div className="h-[500px] w-full">
-              <GISMap 
-                onLocationSelect={handleLocationSelect}
-                showLocationPicker={true}
-                initialCenter={[16.4074, 120.5960]} // Baguio City coordinates
-                initialZoom={13}
-              />
+            <div className="space-y-4">
+              <div className="h-[400px] w-full relative">
+                <MapContainer
+                  center={[16.4074, 120.5960]}
+                  zoom={15}
+                  style={{ height: '100%', width: '100%' }}
+                  className="rounded-lg cursor-crosshair"
+                  eventHandlers={{
+                    click: (e: any) => {
+                      const { lat, lng } = e.latlng;
+                      const address = `Event Location: ${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+                      handleLocationSelect({ lat, lng, address });
+                    }
+                  }}
+                >
+                  <TileLayer
+                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  />
+                  {formData.coordinates && (
+                    <Marker position={[formData.coordinates.lat, formData.coordinates.lng]}>
+                      <Popup>
+                        <div className="text-center">
+                          <MapPin className="h-4 w-4 mx-auto mb-1" />
+                          <strong>Event Location</strong>
+                          <br />
+                          <small>Click anywhere to move marker</small>
+                          <br />
+                          <small className="text-xs text-muted-foreground">
+                            {formData.coordinates.lat.toFixed(4)}, {formData.coordinates.lng.toFixed(4)}
+                          </small>
+                        </div>
+                      </Popup>
+                    </Marker>
+                  )}
+                </MapContainer>
+                
+                {/* Instructions */}
+                <div className="absolute bottom-2 left-2 right-2 z-[1000]">
+                  <div className="bg-primary/90 text-primary-foreground text-xs px-3 py-2 rounded-md backdrop-blur-sm">
+                    <div className="flex items-center">
+                      <MapPin className="h-3 w-3 mr-1" />
+                      Click anywhere on the map to set the event location
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              {formData.location && (
+                <div className="p-3 bg-muted rounded-lg">
+                  <p className="text-sm font-medium">Selected Location:</p>
+                  <p className="text-sm text-muted-foreground">{formData.location}</p>
+                </div>
+              )}
+              
+              <div className="flex justify-end space-x-2">
+                <Button variant="outline" onClick={() => setShowMapDialog(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={() => setShowMapDialog(false)} disabled={!formData.location}>
+                  Confirm Location
+                </Button>
+              </div>
             </div>
           </DialogContent>
         </Dialog>
