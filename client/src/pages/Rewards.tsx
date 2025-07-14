@@ -273,7 +273,7 @@ export default function Rewards() {
                       <div className="flex-1">
                         <h4 className="font-medium">{getRewardTitle(claim.rewardId)}</h4>
                         <p className="text-sm text-muted-foreground">
-                          Claimed: {new Date(claim.claimedAt).toLocaleDateString()}
+                          Claimed: {claim.claimedAt ? new Date(claim.claimedAt).toLocaleDateString() : 'Unknown'}
                         </p>
                         <div className="flex items-center gap-2 mt-2">
                           <Badge className={getStatusColor(claim.status)}>
@@ -284,7 +284,7 @@ export default function Rewards() {
                       </div>
                       <div className="text-right">
                         <p className="text-sm font-mono bg-gray-100 px-2 py-1 rounded">
-                          {claim.claimCode.substring(0, 8)}...
+                          {claim.claimCode ? claim.claimCode.substring(0, 8) + '...' : 'No Code'}
                         </p>
                         <p className="text-xs text-muted-foreground mt-1">
                           Click to view
@@ -321,12 +321,13 @@ export default function Rewards() {
                 <p className="text-sm font-medium mb-2">Claim Code</p>
                 <div className="flex items-center gap-2">
                   <code className="flex-1 bg-white px-3 py-2 rounded border font-mono text-sm">
-                    {selectedClaim.claimCode}
+                    {selectedClaim.claimCode || 'No code available'}
                   </code>
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => copyToClipboard(selectedClaim.claimCode)}
+                    disabled={!selectedClaim.claimCode}
+                    onClick={() => selectedClaim.claimCode && copyToClipboard(selectedClaim.claimCode)}
                   >
                     <Copy className="h-4 w-4" />
                   </Button>
@@ -337,7 +338,7 @@ export default function Rewards() {
               </div>
 
               <div className="text-sm text-muted-foreground space-y-1">
-                <p>Claimed: {new Date(selectedClaim.claimedAt).toLocaleString()}</p>
+                <p>Claimed: {selectedClaim.claimedAt ? new Date(selectedClaim.claimedAt).toLocaleString() : 'Unknown'}</p>
                 {selectedClaim.verifiedAt && (
                   <p>Verified: {new Date(selectedClaim.verifiedAt).toLocaleString()}</p>
                 )}
