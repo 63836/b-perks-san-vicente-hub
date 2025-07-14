@@ -85,9 +85,9 @@ export default function Report() {
       userId: user.id,
       title: reportData.title.trim(),
       description: reportData.description.trim(),
-      location: reportData.location,
-      lat: reportData.lat,
-      lng: reportData.lng,
+      locationAddress: reportData.location,
+      locationLat: reportData.lat,
+      locationLng: reportData.lng,
       imageUrl: "/placeholder.svg", // Default placeholder for now
       status: 'pending',
     };
@@ -129,10 +129,14 @@ export default function Report() {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="aspect-video bg-muted rounded-lg flex items-center justify-center mb-3">
+              <div className="aspect-video bg-muted rounded-lg flex items-center justify-center mb-3 border-2 border-dashed border-muted-foreground/20">
                 <div className="text-center">
-                  <MapPin className="h-12 w-12 mx-auto text-muted-foreground mb-2" />
-                  <p className="text-sm text-muted-foreground">Map Preview</p>
+                  <MapPin className="h-12 w-12 mx-auto text-primary mb-2" />
+                  <p className="text-sm font-medium text-foreground">Location Preview</p>
+                  <p className="text-xs text-muted-foreground">San Vicente, Baguio City</p>
+                  <div className="mt-2 px-3 py-1 bg-primary/10 rounded-full inline-block">
+                    <span className="text-xs font-medium text-primary">📍 GPS Located</span>
+                  </div>
                 </div>
               </div>
               <p className="text-sm text-muted-foreground">

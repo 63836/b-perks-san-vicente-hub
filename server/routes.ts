@@ -314,12 +314,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/reports", async (req, res) => {
     try {
+      console.log('Received report data:', req.body);
       const reportData = insertReportSchema.parse(req.body);
       const { userId } = req.body;
       const report = await storage.createReport({ ...reportData, userId });
       res.json(report);
     } catch (error) {
-      res.status(500).json({ error: "Failed to create report" });
+      console.error('Report creation error:', error);
+      res.status(500).json({ error: "Failed to create report", details: error.message });
     }
   });
 
