@@ -53,6 +53,8 @@ interface MapData {
     title: string;
     description: string;
     status: string;
+    imageUrl?: string;
+    createdAt?: string;
   }>;
   events: Array<{
     id: string;
@@ -451,7 +453,9 @@ const GISMap: React.FC<GISMapProps> = ({ className, activeLayersState = {} }) =>
           lng: report.locationLng || 120.5960,
           title: report.title,
           description: report.description,
-          status: report.status || 'pending'
+          status: report.status || 'pending',
+          imageUrl: report.imageUrl || null,
+          createdAt: report.createdAt || new Date().toISOString()
         }));
         
         // Update map data with real reports

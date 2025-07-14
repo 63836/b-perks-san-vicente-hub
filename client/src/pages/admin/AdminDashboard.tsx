@@ -181,29 +181,9 @@ export default function AdminDashboard() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-              <div>
-                <p className="font-medium text-sm">New user registration</p>
-                <p className="text-xs text-muted-foreground">Maria Santos joined</p>
-              </div>
-              <span className="text-xs text-muted-foreground">2 hours ago</span>
-            </div>
-            
-            <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-              <div>
-                <p className="font-medium text-sm">Event participation</p>
-                <p className="text-xs text-muted-foreground">Clean-up drive completed</p>
-              </div>
-              <span className="text-xs text-muted-foreground">5 hours ago</span>
-            </div>
-            
-            <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-              <div>
-                <p className="font-medium text-sm">New report submitted</p>
-                <p className="text-xs text-muted-foreground">Street light maintenance</p>
-              </div>
-              <span className="text-xs text-muted-foreground">1 day ago</span>
-            </div>
+            <p className="text-muted-foreground text-center py-8">
+              No recent activity. Activity will show here when users register for events, submit reports, or redeem rewards.
+            </p>
           </CardContent>
         </Card>
 

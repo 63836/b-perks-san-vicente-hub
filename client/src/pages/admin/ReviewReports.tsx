@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useLocation } from 'wouter';
+import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -30,52 +31,52 @@ export default function ReviewReports() {
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
   const [statusFilter, setStatusFilter] = useState<string>('all');
 
-  // Mock data for reports
-  const reports: Report[] = [
-    {
-      id: '1',
-      userId: '1',
-      userName: 'Maria Santos',
-      title: 'Broken Street Light',
-      description: 'The street light on Main Street has been broken for 3 days',
-      location: {
-        lat: 16.4023,
-        lng: 120.5960,
-        address: 'Main Street, Barangay San Vicente'
-      },
-      imageUrl: '/placeholder.svg',
-      status: 'pending',
-      submittedAt: '2024-01-15T10:00:00Z'
-    },
-    {
-      id: '2',
-      userId: '2',
-      userName: 'Juan Dela Cruz',
-      title: 'Pothole on Road',
-      description: 'Large pothole causing traffic issues',
-      location: {
-        lat: 16.4025,
-        lng: 120.5962,
-        address: 'Secondary Road, Barangay San Vicente'
-      },
-      status: 'in-progress',
-      submittedAt: '2024-01-14T14:30:00Z'
-    },
-    {
-      id: '3',
-      userId: '3',
-      userName: 'Ana Garcia',
-      title: 'Drainage Issue',
-      description: 'Clogged drainage causing flooding during rain',
-      location: {
-        lat: 16.4020,
-        lng: 120.5958,
-        address: 'Park Avenue, Barangay San Vicente'
-      },
-      status: 'resolved',
-      submittedAt: '2024-01-13T09:15:00Z'
+  // Fetch reports from API
+  const { data: reports = [], isLoading } = useQuery({
+    queryKey: ['/api/reports'],
+    queryFn: async () => {
+      const response = await fetch('/api/reports');
+      if (!response.ok) throw new Error('Failed to fetch reports');
+      const data = await response.json();
+      
+      // Transform API data to match component format
+      return data.map((report: any) => ({
+        id: report.id.toString(),
+        userId: report.userId.toString(),
+        userName: report.userName || 'Unknown User',
+        title: report.title,
+        description: report.description,
+        location: {
+          lat: parseFloat(report.locationLat) || 16.4023,
+          lng: parseFloat(report.locationLng) || 120.5960,
+          address: report.locationAddress || 'Unknown Location'
+        },
+        imageUrl: report.imageUrl || null,
+        status: report.status || 'pending',
+        submittedAt: report.createdAt || new Date().toISOString()
+      }));
     }
-  ];
+  });
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header 
+          title="Review Reports" 
+          onBack={() => setLocation('/admin')}
+          leftButton={<ArrowLeft className="h-5 w-5" />}
+        />
+        <div className="p-4">
+          <div className="flex items-center justify-center h-64">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+              <p className="text-muted-foreground">Loading reports...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const handleStatusUpdate = (reportId: string, newStatus: string) => {
     // TODO: Update status in backend
