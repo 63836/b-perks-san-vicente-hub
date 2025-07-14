@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useLocation } from 'wouter';
+import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -9,40 +10,23 @@ import { notificationStore } from '@/store/notificationStore';
 import { useToast } from '@/hooks/use-toast';
 import { Coins, TrendingUp, Calendar, Gift, MapPin, LogOut } from 'lucide-react';
 
-// Mock transaction data
-const sampleTransactions = [
-  {
-    id: '1',
-    type: 'earned' as const,
-    amount: 50,
-    description: 'Community Clean-up Drive participation',
-    timestamp: '2024-01-15T10:30:00Z',
-    eventId: 'event-1'
-  },
-  {
-    id: '2',
-    type: 'earned' as const,
-    amount: 30,
-    description: 'Disaster Preparedness Seminar attendance',
-    timestamp: '2024-01-12T14:00:00Z',
-    eventId: 'event-2'
-  },
-  {
-    id: '3',
-    type: 'redeemed' as const,
-    amount: -25,
-    description: 'Eco-friendly Water Bottle',
-    timestamp: '2024-01-10T09:15:00Z',
-    rewardId: 'reward-1'
-  }
-];
-
 export default function Dashboard() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [user, setUser] = useState(authStore.getCurrentUser());
-  const [transactions, setTransactions] = useState(sampleTransactions);
   const [notificationCount, setNotificationCount] = useState(0);
+
+  // Fetch user transactions from API
+  const { data: transactions = [] } = useQuery({
+    queryKey: ['/api/users', user?.id, 'transactions'],
+    queryFn: async () => {
+      if (!user?.id) return [];
+      const response = await fetch(`/api/users/${user.id}/transactions`);
+      if (!response.ok) throw new Error('Failed to fetch transactions');
+      return response.json();
+    },
+    enabled: !!user?.id
+  });
 
   useEffect(() => {
     const currentUser = authStore.getCurrentUser();

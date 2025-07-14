@@ -162,7 +162,7 @@ export default function ReviewReports() {
                 <h4 className="font-medium mb-2">Location</h4>
                 <div className="flex items-center">
                   <MapPin className="h-4 w-4 mr-2" />
-                  <span className="text-sm">{selectedReport.location.address}</span>
+                  <span className="text-sm">{selectedReport.location?.address || 'Unknown Location'}</span>
                 </div>
               </div>
 
@@ -266,7 +266,7 @@ export default function ReviewReports() {
                     </div>
                     <div className="flex items-center">
                       <MapPin className="h-4 w-4 mr-1" />
-                      {report.location.address}
+                      {report.location?.address || 'Unknown Location'}
                     </div>
                     <div className="flex items-center">
                       <Clock className="h-4 w-4 mr-1" />
