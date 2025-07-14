@@ -11,6 +11,14 @@ Authentication: Frontend-only mode, no backend database connections.
 
 ## Recent Changes (July 14, 2025)
 
+- **Project Migration Complete**: Successfully migrated from Replit Agent to Replit environment
+- **Critical Bug Fixes**: Fixed multiple core functionality issues during migration
+  - Reporter name display: Fixed "Unknown User" issue in report details by adding userName to reports API
+  - One-time point granting: Admin can now only grant or decline points once per participant
+  - Reward quantity tracking: Fixed quantity deduction and points deduction on reward redemption
+  - Admin interface cleanup: Removed "Publish a Report" feature from admin panel
+- **Enhanced Query Management**: Improved cache invalidation for real-time UI updates
+- **Authentication System**: Maintained frontend-only authentication with file-based storage
 - **Critical Authentication Fix**: Resolved user ID mismatch between frontend and backend authentication systems
 - **Complete Activity Tracking**: All user actions (reports, event registration, point grants) now appear in Recent Activity dashboard
 - **GIS Map Coordinates Fix**: Reports now display at exact user-specified coordinates on community map

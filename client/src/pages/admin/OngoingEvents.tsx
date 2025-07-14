@@ -278,7 +278,7 @@ export default function OngoingEvents() {
                 </div>
               )}
 
-              {(selectedParticipant.status === 'participated' || selectedParticipant.status === 'registered') && !selectedParticipant.pointsAwarded && (
+              {(selectedParticipant.status === 'participated' || selectedParticipant.status === 'registered') && selectedParticipant.status !== 'approved' && selectedParticipant.status !== 'declined' && (
                 <div className="flex space-x-2">
                   <Button 
                     onClick={() => handleGrantPoints(selectedParticipant.id, selectedEvent.id, selectedEvent.pointsReward)}

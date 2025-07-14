@@ -65,7 +65,10 @@ export default function Rewards() {
       body: JSON.stringify({ userId: user?.id }),
     }),
     onSuccess: () => {
+      // Invalidate multiple queries to refresh UI
       queryClient.invalidateQueries({ queryKey: ['/api/users', user?.id, 'reward-claims'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/rewards'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/users', user?.id] });
       toast({
         title: "Success!",
         description: "Reward claimed successfully! Check your history for the claim code.",

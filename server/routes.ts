@@ -363,10 +363,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const participantId = parseInt(req.params.id);
       const updates = req.body;
+      
+      // Get existing participant to check if points were already awarded
+      const existingParticipant = await storage.getEventParticipants(0).then(participants => 
+        participants.find(p => p.id === participantId)
+      );
+      
+      if (!existingParticipant) {
+        return res.status(404).json({ error: "Participant not found" });
+      }
+      
+      // Prevent multiple point awards or status changes if already processed
+      if (existingParticipant.status === "approved" || existingParticipant.status === "declined") {
+        return res.status(400).json({ error: "Participant has already been processed" });
+      }
+      
       const participant = await storage.updateEventParticipant(participantId, updates);
       
-      // If approving participation, award points
-      if (updates.status === "approved" && updates.pointsAwarded) {
+      // If approving participation, award points (only once)
+      if (updates.status === "approved" && updates.pointsAwarded && !existingParticipant.pointsAwarded) {
         const user = await storage.getUser(participant.userId);
         const event = await storage.getEvent(participant.eventId);
         if (user) {
@@ -395,7 +410,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/reports", async (req, res) => {
     try {
       const reports = await storage.getAllReports();
-      res.json(reports);
+      
+      // Add userName to each report
+      const reportsWithUserNames = await Promise.all(
+        reports.map(async (report) => {
+          const user = await storage.getUser(report.userId);
+          return {
+            ...report,
+            userName: user ? user.name : 'Unknown User'
+          };
+        })
+      );
+      
+      res.json(reportsWithUserNames);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch reports" });
     }

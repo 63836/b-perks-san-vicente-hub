@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Header } from '@/components/ui/navigation';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, MapPin, Clock, User, Eye, Edit, Newspaper } from 'lucide-react';
+import { ArrowLeft, MapPin, Clock, User, Eye, Edit } from 'lucide-react';
 
 interface Report {
   id: string;
@@ -105,33 +105,7 @@ export default function ReviewReports() {
     }
   };
 
-  const handlePublishToNews = async (report: Report) => {
-    try {
-      const response = await fetch('/api/news', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          title: `Report Update: ${report.title}`,
-          content: `Status: ${report.status.toUpperCase()}\n\nLocation: ${report.location?.address}\n\nDescription: ${report.description}`,
-          type: 'alert',
-          authorId: 1 // Admin user ID
-        })
-      });
-      
-      if (!response.ok) throw new Error('Failed to publish to news');
-      
-      toast({
-        title: "Published to News",
-        description: "Report has been published to news and alerts.",
-      });
-    } catch (error) {
-      toast({
-        title: "Error", 
-        description: "Failed to publish report to news.",
-        variant: "destructive"
-      });
-    }
-  };
+
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -234,16 +208,7 @@ export default function ReviewReports() {
                 </Select>
               </div>
 
-              <div className="flex space-x-2">
-                <Button 
-                  variant="outline"
-                  onClick={() => handlePublishToNews(selectedReport)}
-                  className="flex-1"
-                >
-                  <Newspaper className="h-4 w-4 mr-2" />
-                  Publish to News
-                </Button>
-              </div>
+
             </CardContent>
           </Card>
         </div>
