@@ -127,7 +127,7 @@ export default function Notifications() {
                           <div className="w-2 h-2 bg-primary rounded-full mr-2"></div>
                           <div className="flex items-center text-xs text-muted-foreground">
                             <Clock className="h-3 w-3 mr-1" />
-                            {formatTimestamp(notification.publishedAt)}
+                            {notification.publishedAt ? formatTimestamp(notification.publishedAt) : 'No date'}
                           </div>
                         </div>
                       </div>

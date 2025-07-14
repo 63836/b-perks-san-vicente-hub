@@ -240,7 +240,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = parseInt(req.params.id);
       const claims = await storage.getUserRewardClaims(userId);
-      res.json(claims);
+      
+      // Add reward details to each claim
+      const claimsWithRewards = await Promise.all(
+        claims.map(async (claim) => {
+          const reward = await storage.getReward(claim.rewardId);
+          return {
+            ...claim,
+            rewardTitle: reward ? reward.title : 'Unknown Reward'
+          };
+        })
+      );
+      
+      res.json(claimsWithRewards);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch user reward claims" });
     }

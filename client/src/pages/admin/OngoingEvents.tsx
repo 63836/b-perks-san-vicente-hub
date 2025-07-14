@@ -196,30 +196,40 @@ export default function OngoingEvents() {
     grantPointsMutation.mutate({ participantId, eventId, points });
   };
 
-  const handleDeclineParticipant = (participantId: number) => {
-    // Decline participant mutation
-    fetch(`/api/event-participants/${participantId}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        status: 'declined',
-        reviewedAt: new Date().toISOString(),
-        reviewedBy: 1 // Admin user ID
-      })
-    }).then(() => {
-      queryClient.invalidateQueries({ queryKey: ['/api/events', selectedEvent?.id, 'participants'] });
+  // Decline participant mutation
+  const declineParticipantMutation = useMutation({
+    mutationFn: async (participantId: number) => {
+      const response = await fetch(`/api/event-participants/${participantId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          status: 'declined',
+          reviewedAt: new Date().toISOString(),
+          reviewedBy: 1 // Admin user ID
+        })
+      });
+      if (!response.ok) throw new Error('Failed to decline participant');
+      return response.json();
+    },
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/events'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/events', selectedEvent?.id, 'participants'] });
       toast({
         title: "Participant Declined",
         description: "Participant has been declined.",
       });
-    }).catch(() => {
+    },
+    onError: () => {
       toast({
         title: "Error",
         description: "Failed to decline participant.",
         variant: "destructive"
       });
-    });
+    }
+  });
+
+  const handleDeclineParticipant = (participantId: number) => {
+    declineParticipantMutation.mutate(participantId);
   };
 
   const getStatusColor = (status: string) => {
@@ -293,6 +303,7 @@ export default function OngoingEvents() {
                     variant="destructive"
                     onClick={() => handleDeclineParticipant(selectedParticipant.id)}
                     className="flex-1"
+                    disabled={declineParticipantMutation.isPending}
                   >
                     <XCircle className="h-4 w-4 mr-2" />
                     Decline

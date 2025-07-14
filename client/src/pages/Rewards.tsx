@@ -32,6 +32,7 @@ interface RewardClaim {
   claimedAt: string;
   verifiedAt?: string;
   verifiedBy?: number;
+  rewardTitle?: string; // Added by API
 }
 
 export default function Rewards() {
@@ -153,8 +154,12 @@ export default function Rewards() {
     });
   };
 
-  const getRewardTitle = (rewardId: number) => {
-    const reward = rewards.find(r => r.id === rewardId);
+  const getRewardTitle = (claim: RewardClaim) => {
+    // Use rewardTitle from API if available, otherwise fallback to rewards lookup
+    if (claim.rewardTitle) {
+      return claim.rewardTitle;
+    }
+    const reward = rewards.find(r => r.id === claim.rewardId);
     return reward ? reward.title : 'Unknown Reward';
   };
 
@@ -333,7 +338,7 @@ export default function Rewards() {
                   <CardContent className="p-4">
                     <div className="flex justify-between items-start">
                       <div className="flex-1">
-                        <h4 className="font-medium">{getRewardTitle(claim.rewardId)}</h4>
+                        <h4 className="font-medium">{getRewardTitle(claim)}</h4>
                         <p className="text-sm text-muted-foreground">
                           Claimed: {claim.claimedAt ? new Date(claim.claimedAt).toLocaleDateString() : 'Unknown'}
                         </p>
@@ -370,7 +375,7 @@ export default function Rewards() {
           {selectedClaim && (
             <div className="space-y-4">
               <div>
-                <h4 className="font-medium mb-2">{getRewardTitle(selectedClaim.rewardId)}</h4>
+                <h4 className="font-medium mb-2">{getRewardTitle(selectedClaim)}</h4>
                 <div className="flex items-center gap-2 mb-3">
                   <Badge className={getStatusColor(selectedClaim.status)}>
                     {getStatusIcon(selectedClaim.status)}

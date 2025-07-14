@@ -6,10 +6,12 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Header } from '@/components/ui/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { notificationStore } from '@/store/notificationStore';
-import { ArrowLeft, Upload, MapPin, Coins } from 'lucide-react';
+import { ArrowLeft, Upload, MapPin, Coins, Calendar } from 'lucide-react';
+import { GISMap } from '@/components/GISMap';
 
 export default function CreateAnnouncement() {
   const [, setLocation] = useLocation();
@@ -20,26 +22,62 @@ export default function CreateAnnouncement() {
     type: 'announcement',
     imageFile: null as File | null,
     location: '',
-    points: 0
+    points: 0,
+    startDate: '',
+    endDate: '',
+    locationLat: null as number | null,
+    locationLng: null as number | null
   });
+  const [showMapDialog, setShowMapDialog] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     try {
-      // Submit to backend
-      const response = await fetch('/api/news', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          title: formData.title,
-          content: formData.content,
-          type: formData.type,
-          authorId: 1 // Admin user ID
-        })
-      });
+      let response;
       
-      if (!response.ok) throw new Error('Failed to create announcement');
+      if (formData.type === 'event') {
+        // Validate event-specific fields
+        if (!formData.startDate || !formData.endDate || !formData.location || formData.points <= 0) {
+          toast({
+            title: "Error",
+            description: "Please fill in all event fields including dates, location, and points.",
+            variant: "destructive"
+          });
+          return;
+        }
+        
+        // Create event
+        response = await fetch('/api/events', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            title: formData.title,
+            description: formData.content,
+            location: formData.location,
+            locationLat: formData.locationLat,
+            locationLng: formData.locationLng,
+            pointsReward: formData.points,
+            startDate: new Date(formData.startDate).toISOString(),
+            endDate: new Date(formData.endDate).toISOString(),
+            imageUrl: null
+          })
+        });
+      } else {
+        // Create announcement/news/alert
+        response = await fetch('/api/news', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            title: formData.title,
+            content: formData.content,
+            type: formData.type,
+            authorId: 1 // Admin user ID
+          })
+        });
+      }
+      
+      if (!response.ok) throw new Error(`Failed to create ${formData.type}`);
       
       toast({
         title: "Success",
@@ -53,7 +91,7 @@ export default function CreateAnnouncement() {
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to create announcement. Please try again.",
+        description: `Failed to create ${formData.type}. Please try again.`,
         variant: "destructive"
       });
     }
@@ -64,6 +102,16 @@ export default function CreateAnnouncement() {
     if (file) {
       setFormData(prev => ({ ...prev, imageFile: file }));
     }
+  };
+
+  const handleLocationSelect = (lat: number, lng: number, address: string) => {
+    setFormData(prev => ({
+      ...prev,
+      location: address,
+      locationLat: lat,
+      locationLng: lng
+    }));
+    setShowMapDialog(false);
   };
 
   return (
@@ -155,9 +203,37 @@ export default function CreateAnnouncement() {
                         placeholder="Click to set location on map"
                         readOnly
                       />
-                      <Button type="button" variant="outline" size="sm">
+                      <Button 
+                        type="button" 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => setShowMapDialog(true)}
+                      >
                         <MapPin className="h-4 w-4" />
                       </Button>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="startDate">Start Date & Time</Label>
+                      <Input
+                        id="startDate"
+                        type="datetime-local"
+                        value={formData.startDate}
+                        onChange={(e) => setFormData(prev => ({ ...prev, startDate: e.target.value }))}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="endDate">End Date & Time</Label>
+                      <Input
+                        id="endDate"
+                        type="datetime-local"
+                        value={formData.endDate}
+                        onChange={(e) => setFormData(prev => ({ ...prev, endDate: e.target.value }))}
+                        required
+                      />
                     </div>
                   </div>
 
@@ -170,7 +246,8 @@ export default function CreateAnnouncement() {
                         value={formData.points}
                         onChange={(e) => setFormData(prev => ({ ...prev, points: parseInt(e.target.value) || 0 }))}
                         placeholder="Enter points"
-                        min="0"
+                        min="1"
+                        required
                       />
                       <Coins className="h-4 w-4 text-muted-foreground" />
                     </div>
@@ -193,6 +270,26 @@ export default function CreateAnnouncement() {
             </form>
           </CardContent>
         </Card>
+
+        {/* Map Dialog for Event Location Selection */}
+        <Dialog open={showMapDialog} onOpenChange={setShowMapDialog}>
+          <DialogContent className="max-w-4xl max-h-[80vh]">
+            <DialogHeader>
+              <DialogTitle className="flex items-center">
+                <MapPin className="h-5 w-5 mr-2" />
+                Select Event Location
+              </DialogTitle>
+            </DialogHeader>
+            <div className="h-[500px] w-full">
+              <GISMap 
+                onLocationSelect={handleLocationSelect}
+                showLocationPicker={true}
+                initialCenter={[16.4074, 120.5960]} // Baguio City coordinates
+                initialZoom={13}
+              />
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );

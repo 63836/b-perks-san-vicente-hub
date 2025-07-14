@@ -48,6 +48,14 @@ Authentication: Frontend-only mode, no backend database connections.
   - GIS map displays actual events from database instead of sample data
   - Admin can see real-time event participants with proper user name resolution
   - Improved query caching to ensure fresh data after registration
+- **Post-Migration Issue Fixes (Latest)**:
+  - **Notification Date Display**: Fixed missing dates in notification timestamps with proper fallback handling
+  - **Reward Claim History**: Fixed "Unknown Reward" display by enhancing API to include reward titles in claims response
+  - **Admin Grant/Decline Buttons**: Improved mutation handling with proper loading states and query invalidation
+  - **Event Creation Enhancement**: Added comprehensive event creation with map-based location selection and date/time pickers
+  - **Event Type Routing**: Events now correctly appear in Events section instead of News when created by admin
+  - **GIS Map Integration**: Fixed GIS map component exports and location selection functionality for event creation
+  - **Claim Code Display**: Resolved claim code visibility issues in reward history detailed view
 
 ## System Architecture
 

@@ -89,9 +89,10 @@ export const newsAlerts = pgTable("news_alerts", {
   id: serial("id").primaryKey(),
   title: text("title").notNull(),
   content: text("content").notNull(),
-  type: text("type").notNull(), // news, alert, announcement
+  type: text("type").notNull(), // news, alert, announcement, event
   imageUrl: text("image_url"),
   publishedAt: timestamp("published_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
   authorId: integer("author_id").notNull(),
 });
 
