@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Header, BottomNavigation } from '@/components/ui/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,7 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { authStore } from '@/store/authStore';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
-import { MapPin, Camera, Send, X } from 'lucide-react';
+import { MapPin, Camera, Send, X, Search, Navigation } from 'lucide-react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -21,6 +21,30 @@ L.Icon.Default.mergeOptions({
   iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
+
+// San Vicente location database
+const sanVicenteLocations = [
+  { id: '1', name: 'Barangay Hall San Vicente', lat: 16.4023, lng: 120.5960 },
+  { id: '2', name: 'San Vicente Elementary School', lat: 16.4018, lng: 120.5955 },
+  { id: '3', name: 'San Vicente Health Center', lat: 16.4025, lng: 120.5965 },
+  { id: '4', name: 'San Vicente Plaza', lat: 16.4020, lng: 120.5962 },
+  { id: '5', name: 'San Vicente Chapel', lat: 16.4015, lng: 120.5958 },
+  { id: '6', name: 'Purok 1 - Main Road', lat: 16.4030, lng: 120.5950 },
+  { id: '7', name: 'Purok 2 - Residential Area', lat: 16.4035, lng: 120.5970 },
+  { id: '8', name: 'Purok 3 - Upper San Vicente', lat: 16.4040, lng: 120.5945 },
+  { id: '9', name: 'Purok 4 - Lower San Vicente', lat: 16.4010, lng: 120.5975 },
+  { id: '10', name: 'San Vicente Market Area', lat: 16.4028, lng: 120.5968 },
+  { id: '11', name: 'San Vicente Basketball Court', lat: 16.4022, lng: 120.5963 },
+  { id: '12', name: 'Upper Bonifacio Street', lat: 16.4045, lng: 120.5940 },
+  { id: '13', name: 'Lower Bonifacio Street', lat: 16.4005, lng: 120.5980 },
+  { id: '14', name: 'Rizal Street San Vicente', lat: 16.4032, lng: 120.5952 },
+  { id: '15', name: 'Del Pilar Street', lat: 16.4038, lng: 120.5948 },
+  { id: '16', name: 'San Vicente Bridge Area', lat: 16.4012, lng: 120.5972 },
+  { id: '17', name: 'Community Garden San Vicente', lat: 16.4026, lng: 120.5966 },
+  { id: '18', name: 'San Vicente Water Station', lat: 16.4024, lng: 120.5961 },
+  { id: '19', name: 'San Vicente Senior Center', lat: 16.4019, lng: 120.5959 },
+  { id: '20', name: 'Main Entrance San Vicente', lat: 16.4033, lng: 120.5953 }
+];
 
 export default function Report() {
   const { toast } = useToast();
@@ -36,6 +60,10 @@ export default function Report() {
   });
   const [showLocationPreview, setShowLocationPreview] = useState(true);
   const [userLocation, setUserLocation] = useState<{lat: number, lng: number} | null>(null);
+  const [locationSearch, setLocationSearch] = useState('');
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [suggestions, setSuggestions] = useState<Array<{id: string, name: string, lat: number, lng: number}>>([]);
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   // Get user's current location
   useEffect(() => {
@@ -64,6 +92,58 @@ export default function Report() {
     }
   }, []);
 
+  // Handle location search and suggestions
+  const handleLocationSearch = (value: string) => {
+    setLocationSearch(value);
+    
+    if (value.length > 2) {
+      const filtered = sanVicenteLocations.filter(location =>
+        location.name.toLowerCase().includes(value.toLowerCase())
+      );
+      setSuggestions(filtered.slice(0, 8)); // Limit to 8 suggestions
+      setShowSuggestions(true);
+    } else {
+      setSuggestions([]);
+      setShowSuggestions(false);
+    }
+  };
+
+  const selectLocation = (location: typeof sanVicenteLocations[0]) => {
+    setReportData(prev => ({
+      ...prev,
+      location: location.name,
+      lat: location.lat,
+      lng: location.lng
+    }));
+    setLocationSearch(location.name);
+    setShowSuggestions(false);
+  };
+
+  const getCurrentLocation = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          setReportData(prev => ({
+            ...prev,
+            lat: latitude,
+            lng: longitude,
+            location: `GPS Location: ${latitude.toFixed(4)}, ${longitude.toFixed(4)}`
+          }));
+          setLocationSearch(`GPS Location: ${latitude.toFixed(4)}, ${longitude.toFixed(4)}`);
+          setUserLocation({ lat: latitude, lng: longitude });
+        },
+        (error) => {
+          toast({
+            title: "Location Error",
+            description: "Unable to get your current location. Please select from suggestions.",
+            variant: "destructive",
+          });
+        }
+      );
+    }
+  };
+
   const submitReportMutation = useMutation({
     mutationFn: (report: any) => apiRequest('/api/reports', {
       method: 'POST',
@@ -84,6 +164,7 @@ export default function Report() {
         lat: 16.4023,
         lng: 120.5960,
       });
+      setLocationSearch('');
     },
     onError: (error: Error) => {
       toast({
@@ -142,7 +223,23 @@ export default function Report() {
       lat: 16.4023,
       lng: 120.5960,
     });
+    setLocationSearch('');
+    setShowSuggestions(false);
   };
+
+  // Close suggestions when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchInputRef.current && !searchInputRef.current.contains(event.target as Node)) {
+        setShowSuggestions(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -231,6 +328,58 @@ export default function Report() {
                   rows={4}
                   required
                 />
+              </div>
+
+              {/* Smart Location Search */}
+              <div className="space-y-2">
+                <Label htmlFor="location">Location *</Label>
+                <div className="relative">
+                  <div className="flex gap-2">
+                    <div className="relative flex-1">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        ref={searchInputRef}
+                        id="location"
+                        type="text"
+                        placeholder="Search San Vicente locations..."
+                        value={locationSearch}
+                        onChange={(e) => handleLocationSearch(e.target.value)}
+                        className="pl-10"
+                        onFocus={() => setShowSuggestions(suggestions.length > 0)}
+                      />
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={getCurrentLocation}
+                      className="shrink-0"
+                    >
+                      <Navigation className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  
+                  {/* Location Suggestions Dropdown */}
+                  {showSuggestions && suggestions.length > 0 && (
+                    <div className="absolute z-50 w-full mt-1 bg-background border border-border rounded-md shadow-lg max-h-60 overflow-y-auto">
+                      {suggestions.map((location) => (
+                        <button
+                          key={location.id}
+                          type="button"
+                          className="w-full px-4 py-2 text-left hover:bg-muted focus:bg-muted focus:outline-none text-sm"
+                          onClick={() => selectLocation(location)}
+                        >
+                          <div className="flex items-center">
+                            <MapPin className="h-4 w-4 mr-2 text-primary" />
+                            <span>{location.name}</span>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Search for a location in San Vicente or use GPS for your current location
+                </p>
               </div>
 
               {/* Photo Upload (Mock) */}

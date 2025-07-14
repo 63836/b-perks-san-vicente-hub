@@ -25,6 +25,7 @@ Authentication: Frontend-only mode, no backend database connections.
   - Report submissions (saved to files)
   - Event participation (users can join events)
   - News alert creation (published successfully)
+- **Smart Location Autocomplete**: Added intelligent location search for San Vicente addresses
 - **Database Location**: All data stored in `data/local_database/` with automatic updates
 - **Persistence Fixed**: Users now persist across server restarts (loads from files on startup)
 - **Migration Benefits**: No external database dependency, enhanced security, improved performance
