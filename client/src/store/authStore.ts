@@ -94,6 +94,11 @@ class AuthStore {
     return user;
   }
 
+  setCurrentUser(user: User) {
+    this.currentUser = user;
+    this.saveToStorage();
+  }
+
   logout() {
     this.currentUser = null;
     localStorage.removeItem('b-perks-current-user');
