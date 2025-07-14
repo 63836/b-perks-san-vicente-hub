@@ -10,7 +10,7 @@ import { authStore } from '@/store/authStore';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 import { MapPin, Camera, Send, X, Search, Navigation } from 'lucide-react';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -64,6 +64,7 @@ export default function Report() {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [suggestions, setSuggestions] = useState<Array<{id: string, name: string, lat: number, lng: number}>>([]);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const [mapInteractive, setMapInteractive] = useState(false);
 
   // Get user's current location
   useEffect(() => {
@@ -141,6 +142,33 @@ export default function Report() {
           });
         }
       );
+    }
+  };
+
+  // Map click handler component
+  const MapClickHandler = () => {
+    useMapEvents({
+      click(e) {
+        if (mapInteractive) {
+          const { lat, lng } = e.latlng;
+          setReportData(prev => ({
+            ...prev,
+            lat: lat,
+            lng: lng,
+            location: `Custom Location: ${lat.toFixed(4)}, ${lng.toFixed(4)}`
+          }));
+          setLocationSearch(`Custom Location: ${lat.toFixed(4)}, ${lng.toFixed(4)}`);
+          setShowSuggestions(false);
+        }
+      },
+    });
+    return null;
+  };
+
+  const toggleMapInteraction = () => {
+    setMapInteractive(!mapInteractive);
+    if (!mapInteractive) {
+      setShowSuggestions(false);
     }
   };
 
@@ -225,6 +253,7 @@ export default function Report() {
     });
     setLocationSearch('');
     setShowSuggestions(false);
+    setMapInteractive(false);
   };
 
   // Close suggestions when clicking outside
@@ -265,28 +294,64 @@ export default function Report() {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="aspect-video rounded-lg overflow-hidden mb-3">
-                <MapContainer
-                  center={[reportData.lat, reportData.lng]}
-                  zoom={15}
-                  style={{ height: '100%', width: '100%' }}
-                  className="rounded-lg"
-                >
-                  <TileLayer
-                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                  />
-                  <Marker position={[reportData.lat, reportData.lng]}>
-                    <Popup>
-                      <div className="text-center">
-                        <MapPin className="h-4 w-4 mx-auto mb-1" />
-                        <strong>Report Location</strong>
-                        <br />
-                        <small>{userLocation ? 'Your GPS Location' : 'Default Location'}</small>
+              <div className="relative">
+                <div className="aspect-video rounded-lg overflow-hidden mb-3 relative">
+                  <MapContainer
+                    center={[reportData.lat, reportData.lng]}
+                    zoom={15}
+                    style={{ height: '100%', width: '100%' }}
+                    className={`rounded-lg ${mapInteractive ? 'cursor-crosshair' : 'cursor-default'}`}
+                  >
+                    <TileLayer
+                      attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                      url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    />
+                    <MapClickHandler />
+                    <Marker position={[reportData.lat, reportData.lng]}>
+                      <Popup>
+                        <div className="text-center">
+                          <MapPin className="h-4 w-4 mx-auto mb-1" />
+                          <strong>Report Location</strong>
+                          <br />
+                          <small>
+                            {mapInteractive ? 'Click anywhere to move marker' : 
+                             userLocation ? 'Your GPS Location' : 'Selected Location'}
+                          </small>
+                          <br />
+                          <small className="text-xs text-muted-foreground">
+                            {reportData.lat.toFixed(4)}, {reportData.lng.toFixed(4)}
+                          </small>
+                        </div>
+                      </Popup>
+                    </Marker>
+                  </MapContainer>
+                  
+                  {/* Map Interaction Toggle */}
+                  <div className="absolute top-2 right-2 z-[1000]">
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant={mapInteractive ? "default" : "outline"}
+                      onClick={toggleMapInteraction}
+                      className="bg-background/90 backdrop-blur-sm"
+                    >
+                      <MapPin className="h-4 w-4 mr-1" />
+                      {mapInteractive ? 'Click Map' : 'Set Location'}
+                    </Button>
+                  </div>
+                  
+                  {/* Interactive Map Instructions */}
+                  {mapInteractive && (
+                    <div className="absolute bottom-2 left-2 right-2 z-[1000]">
+                      <div className="bg-primary/90 text-primary-foreground text-xs px-3 py-2 rounded-md backdrop-blur-sm">
+                        <div className="flex items-center">
+                          <MapPin className="h-3 w-3 mr-1" />
+                          Click anywhere on the map to set your exact location
+                        </div>
                       </div>
-                    </Popup>
-                  </Marker>
-                </MapContainer>
+                    </div>
+                  )}
+                </div>
               </div>
               <p className="text-sm text-muted-foreground">
                 {reportData.location}
@@ -341,11 +406,12 @@ export default function Report() {
                         ref={searchInputRef}
                         id="location"
                         type="text"
-                        placeholder="Search San Vicente locations..."
+                        placeholder="Search locations or click map to set exact position..."
                         value={locationSearch}
                         onChange={(e) => handleLocationSearch(e.target.value)}
                         className="pl-10"
                         onFocus={() => setShowSuggestions(suggestions.length > 0)}
+                        disabled={mapInteractive}
                       />
                     </div>
                     <Button
@@ -353,6 +419,7 @@ export default function Report() {
                       variant="outline"
                       onClick={getCurrentLocation}
                       className="shrink-0"
+                      disabled={mapInteractive}
                     >
                       <Navigation className="h-4 w-4" />
                     </Button>
@@ -378,7 +445,7 @@ export default function Report() {
                   )}
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Search for a location in San Vicente or use GPS for your current location
+                  Search for a location, use GPS, or click "Set Location" to point on the map
                 </p>
               </div>
 
