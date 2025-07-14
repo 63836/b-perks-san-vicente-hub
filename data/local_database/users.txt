@@ -17,7 +17,7 @@ USER ACCOUNTS:
 - Name: Juan Dela Cruz
 - Age: 25
 - Phone: 09987654321
-- Points: 150
+- Points: 200
 - Role: Resident
 - User ID: 2
 

@@ -107,7 +107,7 @@ export default function Signup() {
         ? formData.phoneNumber 
         : `+63${formData.phoneNumber.replace(/^0/, '')}`;
 
-      const user = authStore.signup({
+      const user = await authStore.signup({
         name: formData.name.trim(),
         age: parseInt(formData.age),
         phoneNumber,
@@ -121,7 +121,7 @@ export default function Signup() {
       });
 
       // Auto-login the new user
-      authStore.login(user.username, user.password);
+      await authStore.login(user.username, user.password);
       setLocation('/dashboard');
       
     } catch (error) {

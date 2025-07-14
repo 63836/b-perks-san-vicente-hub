@@ -64,27 +64,31 @@ class AuthStore {
     }
   }
 
-  signup(userData: Omit<User, 'id' | 'points' | 'isAdmin' | 'createdAt'>) {
-    // Check if username already exists
-    if (this.users.find(user => user.username === userData.username)) {
-      throw new Error('Username already exists');
+  async signup(userData: Omit<User, 'id' | 'points' | 'isAdmin' | 'createdAt'>): Promise<User> {
+    // Always use backend API for signup
+    try {
+      const response = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(userData)
+      });
+      
+      if (response.ok) {
+        const user = await response.json();
+        console.log('Backend signup successful, user ID:', user.id);
+        return user;
+      } else {
+        const error = await response.json();
+        throw new Error(error.error || 'Signup failed');
+      }
+    } catch (error) {
+      console.error('Backend signup failed:', error);
+      throw error;
     }
-
-    const newUser: User = {
-      ...userData,
-      id: Date.now(),
-      points: 0,
-      isAdmin: false,
-      createdAt: new Date()
-    };
-
-    this.users.push(newUser);
-    this.saveToStorage();
-    return newUser;
   }
 
   async login(username: string, password: string): Promise<User> {
-    // Try backend API first
+    // Always try backend API first
     try {
       const response = await fetch('/api/auth/login', {
         method: 'POST',
@@ -97,21 +101,15 @@ class AuthStore {
         const user = data.user || data;
         this.currentUser = user;
         this.saveToStorage();
+        console.log('Backend login successful, user ID:', user.id);
         return user;
+      } else {
+        throw new Error('Invalid credentials');
       }
     } catch (error) {
-      console.log('Backend login failed, trying local storage');
+      console.error('Backend login failed:', error);
+      throw new Error('Login failed');
     }
-    
-    // Fallback to local storage
-    const user = this.users.find(u => u.username === username && u.password === password);
-    if (!user) {
-      throw new Error('Invalid credentials');
-    }
-
-    this.currentUser = user;
-    this.saveToStorage();
-    return user;
   }
 
   setCurrentUser(user: User) {

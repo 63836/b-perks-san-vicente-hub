@@ -5,7 +5,7 @@ EVENT ID: 39
 Title: Community Clean-Up Drive
 Description: Join us for a neighborhood cleanup to keep our barangay beautiful and earn points!
 Location: Barangay San Vicente Plaza
-Coordinates: 16.4023, 120.596
+Coordinates: 16.3954, 120.5968
 Points Reward: 50
 Start Date: 7/20/2025 at 8:00:00 AM
 End Date: 7/20/2025 at 12:00:00 PM
