@@ -65,6 +65,9 @@ export default function Report() {
   const [suggestions, setSuggestions] = useState<Array<{id: string, name: string, lat: number, lng: number}>>([]);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const [mapInteractive, setMapInteractive] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Get user's current location
   useEffect(() => {
@@ -145,6 +148,29 @@ export default function Report() {
     }
   };
 
+  // Handle image upload
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setSelectedImage(file);
+      
+      // Create preview URL
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setImagePreview(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeImage = () => {
+    setSelectedImage(null);
+    setImagePreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
   // Map click handler component
   const MapClickHandler = () => {
     useMapEvents({
@@ -173,10 +199,12 @@ export default function Report() {
   };
 
   const submitReportMutation = useMutation({
-    mutationFn: (report: any) => apiRequest('/api/reports', {
-      method: 'POST',
-      body: JSON.stringify(report),
-    }),
+    mutationFn: async (formData: FormData) => {
+      return fetch('/api/reports', {
+        method: 'POST',
+        body: formData,
+      }).then(res => res.json());
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/reports'] });
       toast({
@@ -193,6 +221,11 @@ export default function Report() {
         lng: 120.5960,
       });
       setLocationSearch('');
+      setSelectedImage(null);
+      setImagePreview(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
     },
     onError: (error: Error) => {
       toast({
@@ -229,18 +262,22 @@ export default function Report() {
       return;
     }
 
-    const reportToSubmit = {
-      userId: user.id,
-      title: reportData.title.trim(),
-      description: reportData.description.trim(),
-      locationAddress: reportData.location,
-      locationLat: reportData.lat,
-      locationLng: reportData.lng,
-      imageUrl: "/placeholder.svg", // Default placeholder for now
-      status: 'pending',
-    };
+    // Create FormData for file upload
+    const formData = new FormData();
+    formData.append('userId', user.id.toString());
+    formData.append('title', reportData.title.trim());
+    formData.append('description', reportData.description.trim());
+    formData.append('locationAddress', reportData.location);
+    formData.append('locationLat', reportData.lat.toString());
+    formData.append('locationLng', reportData.lng.toString());
+    formData.append('status', 'pending');
+    
+    // Add image if selected
+    if (selectedImage) {
+      formData.append('image', selectedImage);
+    }
 
-    submitReportMutation.mutate(reportToSubmit);
+    submitReportMutation.mutate(formData);
   };
 
   const handleCancel = () => {
@@ -254,6 +291,11 @@ export default function Report() {
     setLocationSearch('');
     setShowSuggestions(false);
     setMapInteractive(false);
+    setSelectedImage(null);
+    setImagePreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   // Close suggestions when clicking outside
@@ -446,6 +488,58 @@ export default function Report() {
                 </div>
                 <p className="text-xs text-muted-foreground">
                   Search for a location, use GPS, or click "Set Location" to point on the map
+                </p>
+              </div>
+
+              {/* Photo Upload */}
+              <div className="space-y-2">
+                <Label htmlFor="photo">Add Photo (Optional)</Label>
+                <div className="space-y-3">
+                  {/* Image Preview */}
+                  {imagePreview && (
+                    <div className="relative">
+                      <img
+                        src={imagePreview}
+                        alt="Report preview"
+                        className="w-full h-32 object-cover rounded-lg border"
+                      />
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="sm"
+                        onClick={removeImage}
+                        className="absolute top-2 right-2"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  )}
+                  
+                  {/* Upload Button */}
+                  <div className="flex items-center justify-center w-full">
+                    <label
+                      htmlFor="photo-upload"
+                      className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-muted-foreground/25 rounded-lg cursor-pointer bg-muted/50 hover:bg-muted/75 transition-colors"
+                    >
+                      <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                        <Camera className="w-6 h-6 mb-2 text-muted-foreground" />
+                        <p className="text-sm text-muted-foreground">
+                          {selectedImage ? 'Change photo' : 'Add photo of the issue'}
+                        </p>
+                      </div>
+                      <input
+                        ref={fileInputRef}
+                        id="photo-upload"
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                        className="hidden"
+                      />
+                    </label>
+                  </div>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Photos help officials understand the issue better. Max file size: 5MB
                 </p>
               </div>
 

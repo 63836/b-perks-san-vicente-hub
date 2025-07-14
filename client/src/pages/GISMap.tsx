@@ -13,6 +13,8 @@ import { MapPin, Layers, Navigation, Download, Trash2 } from 'lucide-react';
 const mapLayers = [
   { id: 'basemap', name: 'Street Map', active: true, type: 'Base Layer' },
   { id: 'satellite', name: 'Satellite View', active: false, type: 'Base Layer' },
+  { id: 'cyclemap', name: 'Cycle Map', active: false, type: 'Base Layer' },
+  { id: 'cyclosm', name: 'CyclOSM', active: false, type: 'Base Layer' },
   { id: 'reports', name: 'Community Reports', active: true, type: 'Data Layer' },
   { id: 'events', name: 'Event Locations', active: true, type: 'Data Layer' },
   { id: 'safety', name: 'Safety Levels', active: false, type: 'Data Layer' }

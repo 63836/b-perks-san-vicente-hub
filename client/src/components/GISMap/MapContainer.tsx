@@ -411,7 +411,10 @@ const GISMap: React.FC<GISMapProps> = ({ className, activeLayersState = {} }) =>
   const [realReports, setRealReports] = useState<any[]>([]);
   
   // Determine base layer from the activeLayersState
-  const baseLayer = activeLayersState.satellite ? 'satellite' : 'street';
+  let baseLayer = 'street';
+  if (activeLayersState.satellite) baseLayer = 'satellite';
+  if (activeLayersState.cyclemap) baseLayer = 'cyclemap';
+  if (activeLayersState.cyclosm) baseLayer = 'cyclosm';
   
   // Map the activeLayersState to the internal layer structure
   const layers = {
@@ -494,13 +497,19 @@ const GISMap: React.FC<GISMapProps> = ({ className, activeLayersState = {} }) =>
       >
         {/* Base Layer - Always show one */}
         <TileLayer
-          attribution={baseLayer === 'street' 
-            ? '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            : '&copy; <a href="https://www.esri.com/">Esri</a>'
+          attribution={
+            baseLayer === 'street' ? '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' :
+            baseLayer === 'satellite' ? '&copy; <a href="https://www.esri.com/">Esri</a>' :
+            baseLayer === 'cyclemap' ? '&copy; <a href="https://www.opencyclemap.org/">OpenCycleMap</a>, Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' :
+            baseLayer === 'cyclosm' ? '&copy; <a href="https://github.com/cyclosm/cyclosm-cartocss-style/releases">CyclOSM</a> | Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' :
+            '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           }
-          url={baseLayer === 'street' 
-            ? "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            : "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+          url={
+            baseLayer === 'street' ? "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" :
+            baseLayer === 'satellite' ? "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}" :
+            baseLayer === 'cyclemap' ? "https://{s}.tile.thunderforest.com/cycle/{z}/{x}/{y}.png" :
+            baseLayer === 'cyclosm' ? "https://{s}.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png" :
+            "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           }
         />
 
@@ -516,13 +525,36 @@ const GISMap: React.FC<GISMapProps> = ({ className, activeLayersState = {} }) =>
                 icon={getReportIcon(report.status)}
               >
                 <Popup>
-                  <div>
-                    <strong>{report.title}</strong>
+                  <div className="p-1 min-w-64">
+                    <strong className="text-sm">{report.title}</strong>
                     <br />
-                    <p className="text-sm">{report.description}</p>
-                    <Badge variant="outline" className="mt-1">
-                      {report.status}
-                    </Badge>
+                    <p className="text-sm mt-1">{report.description}</p>
+                    
+                    {/* Display image if available */}
+                    {report.imageUrl && report.imageUrl !== "/placeholder.svg" && (
+                      <div className="mt-2">
+                        <img 
+                          src={report.imageUrl} 
+                          alt="Report image" 
+                          className="w-full h-28 object-cover rounded border"
+                          onError={(e) => {
+                            // Hide image if it fails to load
+                            e.currentTarget.style.display = 'none';
+                          }}
+                        />
+                      </div>
+                    )}
+                    
+                    <div className="flex items-center justify-between mt-2">
+                      <Badge variant="outline" className="text-xs">
+                        {report.status}
+                      </Badge>
+                      {report.createdAt && (
+                        <span className="text-xs text-muted-foreground">
+                          {new Date(report.createdAt).toLocaleDateString()}
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </Popup>
               </Marker>

@@ -1,5 +1,9 @@
 import type { Express } from "express";
+import express from "express";
 import { createServer, type Server } from "http";
+import multer from "multer";
+import path from "path";
+import fs from "fs";
 import { storage } from "./storage";
 import { 
   insertUserSchema, 
@@ -9,7 +13,44 @@ import {
   insertNewsAlertSchema 
 } from "@shared/schema";
 
+// Configure multer for file uploads
+const uploadDir = path.join(process.cwd(), 'uploads');
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
+
+const storage_multer = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, uploadDir);
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
+const upload = multer({
+  storage: storage_multer,
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5MB limit
+  },
+  fileFilter: (req, file, cb) => {
+    // Check if the file is an image
+    if (file.mimetype.startsWith('image/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only image files are allowed!'));
+    }
+  }
+});
+
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Serve uploaded files
+  app.use('/uploads', (req, res, next) => {
+    res.header('Cross-Origin-Resource-Policy', 'cross-origin');
+    next();
+  });
+  app.use('/uploads', express.static(uploadDir));
   // Auth routes
   app.post("/api/auth/login", async (req, res) => {
     try {
@@ -312,16 +353,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/reports", async (req, res) => {
+  app.post("/api/reports", upload.single('image'), async (req, res) => {
     try {
-      console.log('Received report data:', req.body);
-      const reportData = insertReportSchema.parse(req.body);
-      const { userId } = req.body;
-      const report = await storage.createReport({ ...reportData, userId });
+      console.log("Received report data:", req.body);
+      console.log("Received file:", req.file);
+      
+      const reportData = {
+        userId: parseInt(req.body.userId),
+        title: req.body.title,
+        description: req.body.description,
+        locationAddress: req.body.locationAddress,
+        locationLat: parseFloat(req.body.locationLat),
+        locationLng: parseFloat(req.body.locationLng),
+        status: req.body.status,
+        imageUrl: req.file ? `/uploads/${req.file.filename}` : "/placeholder.svg"
+      };
+      
+      const report = await storage.createReport(reportData);
       res.json(report);
     } catch (error) {
-      console.error('Report creation error:', error);
-      res.status(500).json({ error: "Failed to create report", details: error.message });
+      console.error("Error creating report:", error);
+      res.status(500).json({ error: "Failed to create report" });
     }
   });
 
