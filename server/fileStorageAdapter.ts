@@ -147,6 +147,8 @@ export class FileStorageAdapter implements IStorage {
           imageUrl: "/placeholder.svg",
           isAvailable: true,
           category: "Environment",
+          totalQuantity: 20,
+          availableQuantity: 20,
           createdAt: new Date(),
         },
         {
@@ -157,6 +159,8 @@ export class FileStorageAdapter implements IStorage {
           imageUrl: "/placeholder.svg",
           isAvailable: true,
           category: "Gardening",
+          totalQuantity: 15,
+          availableQuantity: 15,
           createdAt: new Date(),
         },
         {
@@ -167,6 +171,8 @@ export class FileStorageAdapter implements IStorage {
           imageUrl: "/placeholder.svg",
           isAvailable: true,
           category: "Apparel",
+          totalQuantity: 30,
+          availableQuantity: 30,
           createdAt: new Date(),
         },
         {
@@ -177,6 +183,8 @@ export class FileStorageAdapter implements IStorage {
           imageUrl: "/placeholder.svg",
           isAvailable: true,
           category: "Safety",
+          totalQuantity: 10,
+          availableQuantity: 10,
           createdAt: new Date(),
         },
         {
@@ -187,6 +195,8 @@ export class FileStorageAdapter implements IStorage {
           imageUrl: "/placeholder.svg",
           isAvailable: true,
           category: "Environment",
+          totalQuantity: 25,
+          availableQuantity: 25,
           createdAt: new Date(),
         }
       ];
@@ -316,6 +326,8 @@ export class FileStorageAdapter implements IStorage {
       content += `Description: ${reward.description}\n`;
       content += `Points Cost: ${reward.pointsCost}\n`;
       content += `Category: ${reward.category}\n`;
+      content += `Total Quantity: ${reward.totalQuantity || 1}\n`;
+      content += `Available Quantity: ${reward.availableQuantity || 1}\n`;
       content += `Status: ${reward.isAvailable ? 'Available' : 'Unavailable'}\n`;
       content += `Image: ${reward.imageUrl || '/placeholder.svg'}\n\n`;
     });
@@ -480,6 +492,8 @@ export class FileStorageAdapter implements IStorage {
         imageUrl: "/placeholder.svg",
         isAvailable: true,
         category: "Environment",
+        totalQuantity: 20,
+        availableQuantity: 20,
         createdAt: new Date(),
       },
       {
@@ -490,6 +504,8 @@ export class FileStorageAdapter implements IStorage {
         imageUrl: "/placeholder.svg",
         isAvailable: true,
         category: "Gardening",
+        totalQuantity: 15,
+        availableQuantity: 15,
         createdAt: new Date(),
       },
       {
@@ -500,6 +516,8 @@ export class FileStorageAdapter implements IStorage {
         imageUrl: "/placeholder.svg",
         isAvailable: true,
         category: "Apparel",
+        totalQuantity: 30,
+        availableQuantity: 30,
         createdAt: new Date(),
       },
       {
@@ -510,6 +528,8 @@ export class FileStorageAdapter implements IStorage {
         imageUrl: "/placeholder.svg",
         isAvailable: true,
         category: "Safety",
+        totalQuantity: 10,
+        availableQuantity: 10,
         createdAt: new Date(),
       },
       {
@@ -520,6 +540,8 @@ export class FileStorageAdapter implements IStorage {
         imageUrl: "/placeholder.svg",
         isAvailable: true,
         category: "Environment",
+        totalQuantity: 25,
+        availableQuantity: 25,
         createdAt: new Date(),
       }
     ];
@@ -733,6 +755,7 @@ export class FileStorageAdapter implements IStorage {
     const newReward: Reward = {
       id: this.currentId++,
       createdAt: new Date(),
+      isAvailable: (reward.availableQuantity || 1) > 0,
       ...reward
     };
     this.rewards.set(newReward.id, newReward);

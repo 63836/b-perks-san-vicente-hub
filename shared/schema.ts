@@ -22,6 +22,8 @@ export const rewards = pgTable("rewards", {
   imageUrl: text("image_url"),
   isAvailable: boolean("is_available").notNull().default(true),
   category: text("category").notNull(),
+  totalQuantity: integer("total_quantity").notNull().default(1),
+  availableQuantity: integer("available_quantity").notNull().default(1),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
@@ -120,6 +122,8 @@ export const insertRewardSchema = createInsertSchema(rewards).pick({
   pointsCost: true,
   imageUrl: true,
   category: true,
+  totalQuantity: true,
+  availableQuantity: true,
 });
 
 export const insertEventSchema = createInsertSchema(events).pick({

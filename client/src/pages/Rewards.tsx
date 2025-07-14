@@ -18,6 +18,8 @@ interface Reward {
   imageUrl?: string;
   isAvailable: boolean;
   category: string;
+  totalQuantity: number;
+  availableQuantity: number;
   createdAt: string;
 }
 
@@ -78,12 +80,11 @@ export default function Rewards() {
     },
   });
 
-  const availableRewards = rewards.filter(reward => reward.isAvailable);
-  const categories = ['All', ...new Set(availableRewards.map(reward => reward.category))];
+  const categories = ['All', ...new Set(rewards.map(reward => reward.category))];
   
   const filteredRewards = selectedCategory === 'All' 
-    ? availableRewards 
-    : availableRewards.filter(reward => reward.category === selectedCategory);
+    ? rewards 
+    : rewards.filter(reward => reward.category === selectedCategory);
 
   const handleRedeem = (reward: Reward) => {
     if (!user) {
@@ -99,6 +100,15 @@ export default function Rewards() {
       toast({
         title: "Insufficient Points",
         description: `You need ${reward.pointsCost - user.points} more points to redeem this reward.`,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (reward.availableQuantity <= 0) {
+      toast({
+        title: "Out of Stock",
+        description: "This reward is currently out of stock.",
         variant: "destructive",
       });
       return;
@@ -199,8 +209,12 @@ export default function Rewards() {
 
         {/* Rewards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {filteredRewards.map((reward) => (
-            <Card key={reward.id} className={!reward.isAvailable ? 'opacity-60' : ''}>
+          {filteredRewards.map((reward) => {
+            const isOutOfStock = reward.availableQuantity <= 0;
+            const isLowStock = reward.availableQuantity <= 3 && reward.availableQuantity > 0;
+            
+            return (
+            <Card key={reward.id} className={isOutOfStock ? 'opacity-60' : ''}>
               <CardHeader className="pb-3">
                 <div className="flex items-start justify-between">
                   <CardTitle className="text-lg">{reward.title}</CardTitle>
@@ -231,17 +245,30 @@ export default function Rewards() {
                   {reward.description}
                 </p>
 
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center text-sm text-muted-foreground">
-                    <Star className="h-4 w-4 mr-1" />
-                    {reward.isAvailable ? 'Available' : 'Out of Stock'}
+                {/* Stock Status */}
+                <div className="flex items-center justify-between text-sm">
+                  <div className="flex items-center space-x-2">
+                    <div className={`px-2 py-1 rounded-full text-xs ${
+                      isOutOfStock 
+                        ? 'bg-red-100 text-red-800' 
+                        : isLowStock 
+                        ? 'bg-yellow-100 text-yellow-800' 
+                        : 'bg-green-100 text-green-800'
+                    }`}>
+                      {isOutOfStock ? 'Out of Stock' : isLowStock ? 'Low Stock' : 'Available'}
+                    </div>
                   </div>
-                  
+                  <div className="text-muted-foreground">
+                    {reward.availableQuantity}/{reward.totalQuantity} left
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between">
                   <Button
                     size="sm"
-                    disabled={!reward.isAvailable || user.points < reward.pointsCost || redeemMutation.isPending}
+                    disabled={isOutOfStock || user.points < reward.pointsCost || redeemMutation.isPending}
                     onClick={() => handleRedeem(reward)}
-                    className="bg-gradient-gold"
+                    className="bg-gradient-gold flex-1"
                   >
                     <ShoppingCart className="h-4 w-4 mr-1" />
                     {redeemMutation.isPending ? 'Redeeming...' : 'Redeem'}
@@ -249,7 +276,8 @@ export default function Rewards() {
                 </div>
               </CardContent>
             </Card>
-          ))}
+            );
+          })}
         </div>
 
         {filteredRewards.length === 0 && (

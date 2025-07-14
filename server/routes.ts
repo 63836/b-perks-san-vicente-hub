@@ -137,12 +137,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/rewards", async (req, res) => {
+  app.post("/api/rewards", upload.single('image'), async (req, res) => {
     try {
-      const rewardData = insertRewardSchema.parse(req.body);
+      const rewardData = {
+        title: req.body.title,
+        description: req.body.description,
+        pointsCost: parseInt(req.body.pointsCost),
+        category: req.body.category,
+        totalQuantity: parseInt(req.body.totalQuantity) || 1,
+        availableQuantity: parseInt(req.body.availableQuantity) || parseInt(req.body.totalQuantity) || 1,
+        imageUrl: req.file ? `/uploads/${req.file.filename}` : "/placeholder.svg"
+      };
+      
       const reward = await storage.createReward(rewardData);
       res.json(reward);
     } catch (error) {
+      console.error("Error creating reward:", error);
       res.status(500).json({ error: "Failed to create reward" });
     }
   });
@@ -185,6 +195,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (user.points < reward.pointsCost) {
         return res.status(400).json({ error: "Insufficient points" });
       }
+      
+      if (reward.availableQuantity <= 0) {
+        return res.status(400).json({ error: "Reward is out of stock" });
+      }
+      
+      // Update reward quantity
+      await storage.updateReward(rewardId, { 
+        availableQuantity: reward.availableQuantity - 1,
+        isAvailable: reward.availableQuantity - 1 > 0
+      });
       
       // Deduct points and create claim
       await storage.updateUserPoints(userId, user.points - reward.pointsCost);

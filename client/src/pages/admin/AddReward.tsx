@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useLocation } from 'wouter';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,25 +14,58 @@ import { ArrowLeft, Upload, Coins, Package } from 'lucide-react';
 export default function AddReward() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [formData, setFormData] = useState({
     title: '',
     description: '',
     pointsCost: 0,
     category: '',
-    imageFile: null as File | null,
-    isAvailable: true
+    totalQuantity: 1,
+    imageFile: null as File | null
+  });
+
+  const createRewardMutation = useMutation({
+    mutationFn: async (data: FormData) => {
+      const response = await fetch('/api/rewards', {
+        method: 'POST',
+        body: data
+      });
+      if (!response.ok) throw new Error('Failed to create reward');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/rewards'] });
+      toast({
+        title: "Success",
+        description: "Reward added successfully!",
+      });
+      setLocation('/admin/dashboard');
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to create reward. Please try again.",
+        variant: "destructive"
+      });
+    }
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // TODO: Submit to backend
-    toast({
-      title: "Success",
-      description: "Reward added successfully!",
-    });
+    const submitData = new FormData();
+    submitData.append('title', formData.title);
+    submitData.append('description', formData.description);
+    submitData.append('pointsCost', formData.pointsCost.toString());
+    submitData.append('category', formData.category);
+    submitData.append('totalQuantity', formData.totalQuantity.toString());
+    submitData.append('availableQuantity', formData.totalQuantity.toString());
     
-    setLocation('/admin/dashboard');
+    if (formData.imageFile) {
+      submitData.append('image', formData.imageFile);
+    }
+    
+    createRewardMutation.mutate(submitData);
   };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -101,6 +135,19 @@ export default function AddReward() {
                   />
                   <Coins className="h-4 w-4 text-muted-foreground" />
                 </div>
+              </div>
+
+              <div>
+                <Label htmlFor="totalQuantity">Total Quantity</Label>
+                <Input
+                  id="totalQuantity"
+                  type="number"
+                  value={formData.totalQuantity}
+                  onChange={(e) => setFormData(prev => ({ ...prev, totalQuantity: parseInt(e.target.value) || 1 }))}
+                  placeholder="Enter total quantity"
+                  min="1"
+                  required
+                />
               </div>
 
               <div>

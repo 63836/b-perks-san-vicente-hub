@@ -6,6 +6,8 @@ Title: Eco-Friendly Water Bottle
 Description: BPA-free stainless steel water bottle with Barangay San Vicente logo
 Points Cost: 100
 Category: Environment
+Total Quantity: 20
+Available Quantity: 20
 Status: Available
 Image: /placeholder.svg
 
@@ -14,6 +16,8 @@ Title: Community Garden Seeds Pack
 Description: Vegetable seeds for home gardening - tomato, lettuce, herbs
 Points Cost: 75
 Category: Gardening
+Total Quantity: 15
+Available Quantity: 15
 Status: Available
 Image: /placeholder.svg
 
@@ -22,6 +26,8 @@ Title: Barangay T-Shirt
 Description: Official Barangay San Vicente t-shirt, available in all sizes
 Points Cost: 150
 Category: Apparel
+Total Quantity: 30
+Available Quantity: 30
 Status: Available
 Image: /placeholder.svg
 
@@ -30,6 +36,8 @@ Title: Emergency Flashlight
 Description: LED flashlight with hand crank for emergencies
 Points Cost: 200
 Category: Safety
+Total Quantity: 10
+Available Quantity: 10
 Status: Available
 Image: /placeholder.svg
 
@@ -38,6 +46,8 @@ Title: Reusable Shopping Bag
 Description: Durable canvas shopping bag to reduce plastic use
 Points Cost: 50
 Category: Environment
+Total Quantity: 25
+Available Quantity: 25
 Status: Available
 Image: /placeholder.svg
 
