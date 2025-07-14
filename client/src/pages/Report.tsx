@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Header, BottomNavigation } from '@/components/ui/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,6 +10,17 @@ import { authStore } from '@/store/authStore';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 import { MapPin, Camera, Send, X } from 'lucide-react';
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+
+// Fix for default markers in React Leaflet
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+});
 
 export default function Report() {
   const { toast } = useToast();
@@ -24,6 +35,34 @@ export default function Report() {
     lng: 120.5960,
   });
   const [showLocationPreview, setShowLocationPreview] = useState(true);
+  const [userLocation, setUserLocation] = useState<{lat: number, lng: number} | null>(null);
+
+  // Get user's current location
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          setUserLocation({ lat: latitude, lng: longitude });
+          setReportData(prev => ({
+            ...prev,
+            lat: latitude,
+            lng: longitude,
+            location: `Lat: ${latitude.toFixed(4)}, Lng: ${longitude.toFixed(4)}`
+          }));
+        },
+        (error) => {
+          console.log('Geolocation error:', error);
+          // Keep default location if geolocation fails
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 60000
+        }
+      );
+    }
+  }, []);
 
   const submitReportMutation = useMutation({
     mutationFn: (report: any) => apiRequest('/api/reports', {
@@ -129,15 +168,28 @@ export default function Report() {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="aspect-video bg-muted rounded-lg flex items-center justify-center mb-3 border-2 border-dashed border-muted-foreground/20">
-                <div className="text-center">
-                  <MapPin className="h-12 w-12 mx-auto text-primary mb-2" />
-                  <p className="text-sm font-medium text-foreground">Location Preview</p>
-                  <p className="text-xs text-muted-foreground">San Vicente, Baguio City</p>
-                  <div className="mt-2 px-3 py-1 bg-primary/10 rounded-full inline-block">
-                    <span className="text-xs font-medium text-primary">📍 GPS Located</span>
-                  </div>
-                </div>
+              <div className="aspect-video rounded-lg overflow-hidden mb-3">
+                <MapContainer
+                  center={[reportData.lat, reportData.lng]}
+                  zoom={15}
+                  style={{ height: '100%', width: '100%' }}
+                  className="rounded-lg"
+                >
+                  <TileLayer
+                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  />
+                  <Marker position={[reportData.lat, reportData.lng]}>
+                    <Popup>
+                      <div className="text-center">
+                        <MapPin className="h-4 w-4 mx-auto mb-1" />
+                        <strong>Report Location</strong>
+                        <br />
+                        <small>{userLocation ? 'Your GPS Location' : 'Default Location'}</small>
+                      </div>
+                    </Popup>
+                  </Marker>
+                </MapContainer>
               </div>
               <p className="text-sm text-muted-foreground">
                 {reportData.location}

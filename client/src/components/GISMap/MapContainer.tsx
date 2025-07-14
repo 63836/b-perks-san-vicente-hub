@@ -407,7 +407,8 @@ interface GISMapProps {
 const GISMap: React.FC<GISMapProps> = ({ className, activeLayersState = {} }) => {
   const [isDownloading, setIsDownloading] = useState(false);
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
-  const [mapData] = useState<MapData>(sampleMapData);
+  const [mapData, setMapData] = useState<MapData>(sampleMapData);
+  const [realReports, setRealReports] = useState<any[]>([]);
   
   // Determine base layer from the activeLayersState
   const baseLayer = activeLayersState.satellite ? 'satellite' : 'street';
@@ -432,6 +433,35 @@ const GISMap: React.FC<GISMapProps> = ({ className, activeLayersState = {} }) =>
 
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
+
+    // Fetch real reports from the database
+    const fetchReports = async () => {
+      try {
+        const response = await fetch('/api/reports');
+        const reports = await response.json();
+        setRealReports(reports);
+        
+        // Convert real reports to map format
+        const convertedReports = reports.map((report: any) => ({
+          id: report.id.toString(),
+          lat: report.locationLat || 16.4023,
+          lng: report.locationLng || 120.5960,
+          title: report.title,
+          description: report.description,
+          status: report.status || 'pending'
+        }));
+        
+        // Update map data with real reports
+        setMapData(prev => ({
+          ...prev,
+          reports: convertedReports
+        }));
+      } catch (error) {
+        console.error('Failed to fetch reports:', error);
+      }
+    };
+
+    fetchReports();
 
     return () => {
       window.removeEventListener('online', handleOnline);
