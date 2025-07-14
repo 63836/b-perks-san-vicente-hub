@@ -427,7 +427,7 @@ const GISMap: React.FC<GISMapProps> = ({ className, activeLayersState = {} }) =>
     puroks: false // Removed purok boundaries
   };
 
-  // Calculate overlapping reports for safety level visualization
+  // Calculate overlapping reports for safety level visualization using real map data
   const overlappingReports = layers.safetyAreas ? findOverlappingReports(mapData.reports) : [];
   
   // Calculate overlapping reports for red circle visualization
@@ -487,10 +487,14 @@ const GISMap: React.FC<GISMapProps> = ({ className, activeLayersState = {} }) =>
     };
 
     fetchData();
+    
+    // Auto-refresh data every 30 seconds to keep map current
+    const intervalId = setInterval(fetchData, 30000);
 
     return () => {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
+      clearInterval(intervalId);
     };
   }, []);
 

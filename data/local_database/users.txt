@@ -66,6 +66,15 @@ USER ACCOUNTS:
 - Role: Resident
 - User ID: 33
 
-Total Users: 7
+- Username: Leonne
+- Password: danpaneda123
+- Name: Leonne
+- Age: 20
+- Phone: +639669176096
+- Points: 0
+- Role: Resident
+- User ID: 40
+
+Total Users: 8
 Admin Users: 1
-Regular Users: 6
+Regular Users: 7

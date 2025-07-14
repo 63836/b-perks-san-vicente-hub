@@ -1,7 +1,7 @@
 COMMUNITY EVENTS - B-PERKS SYSTEM
 ==================================
 
-EVENT ID: 39
+EVENT ID: 46
 Title: Community Clean-Up Drive
 Description: Join us for a neighborhood cleanup to keep our barangay beautiful and earn points!
 Location: Barangay San Vicente Plaza

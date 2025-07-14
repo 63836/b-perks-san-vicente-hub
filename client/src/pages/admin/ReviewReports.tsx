@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useLocation } from 'wouter';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -28,6 +28,7 @@ interface Report {
 export default function ReviewReports() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
   const [statusFilter, setStatusFilter] = useState<string>('all');
 
@@ -78,20 +79,58 @@ export default function ReviewReports() {
     );
   }
 
-  const handleStatusUpdate = (reportId: string, newStatus: string) => {
-    // TODO: Update status in backend
-    toast({
-      title: "Status Updated",
-      description: `Report status updated to ${newStatus}.`,
-    });
+  const handleStatusUpdate = async (reportId: string, newStatus: string) => {
+    try {
+      const response = await fetch(`/api/reports/${reportId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus })
+      });
+      
+      if (!response.ok) throw new Error('Failed to update status');
+      
+      // Invalidate and refetch reports to update the UI
+      queryClient.invalidateQueries({ queryKey: ['/api/reports'] });
+      
+      toast({
+        title: "Status Updated",
+        description: `Report status updated to ${newStatus}.`,
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update report status.",
+        variant: "destructive"
+      });
+    }
   };
 
-  const handlePublishToNews = (report: Report) => {
-    // TODO: Publish report to news/alerts
-    toast({
-      title: "Published to News",
-      description: "Report has been published to news and alerts.",
-    });
+  const handlePublishToNews = async (report: Report) => {
+    try {
+      const response = await fetch('/api/news', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: `Report Update: ${report.title}`,
+          content: `Status: ${report.status.toUpperCase()}\n\nLocation: ${report.location?.address}\n\nDescription: ${report.description}`,
+          type: 'alert',
+          authorId: 1 // Admin user ID
+        })
+      });
+      
+      if (!response.ok) throw new Error('Failed to publish to news');
+      
+      toast({
+        title: "Published to News",
+        description: "Report has been published to news and alerts.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error", 
+        description: "Failed to publish report to news.",
+        variant: "destructive"
+      });
+    }
   };
 
   const getStatusColor = (status: string) => {

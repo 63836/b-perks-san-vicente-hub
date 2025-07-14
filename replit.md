@@ -11,9 +11,13 @@ Authentication: Frontend-only mode, no backend database connections.
 
 ## Recent Changes (July 14, 2025)
 
-- **Project Migration Completed**: Successfully migrated from Replit Agent to standard Replit environment
-- **Issue Fixes Applied**: Fixed user dashboard recent activity, admin reports display, and GIS map image rendering
-- **Frontend-Only Mode**: System now operates entirely in frontend with local storage authentication
+- **Critical Authentication Fix**: Resolved user ID mismatch between frontend and backend authentication systems
+- **Complete Activity Tracking**: All user actions (reports, event registration, point grants) now appear in Recent Activity dashboard
+- **GIS Map Coordinates Fix**: Reports now display at exact user-specified coordinates on community map
+- **Admin Participant Display**: Event participants now show actual user names and phone numbers instead of "Unknown User"
+- **Real-Time Status Updates**: Report status changes by admin now immediately reflect in UI and notifications
+- **News Publishing System**: Admin can publish report updates to News & Alerts with proper status information
+- **Transaction System Enhancement**: Added support for report submissions and event registrations in activity tracking
 - **Real-Time Data Persistence**: All operations now automatically save to local text files:
   - User registrations, login credentials, and point updates
   - Community events creation and management
