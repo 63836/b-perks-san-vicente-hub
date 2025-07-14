@@ -2,52 +2,23 @@ import { Header, BottomNavigation } from '@/components/ui/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Bell, Clock, AlertTriangle, Megaphone, Calendar } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 
-// Sample notifications data
-const sampleNotifications = [
-  {
-    id: '1',
-    title: 'New Event: Tree Planting Activity',
-    message: 'Join us for a tree planting activity on January 25. Register now to earn 75 points!',
-    type: 'event',
-    timestamp: '2024-01-15T14:30:00Z',
-    isRead: false
-  },
-  {
-    id: '2',
-    title: 'Heavy Rainfall Alert',
-    message: 'Yellow rainfall warning issued for Baguio City. Stay safe and avoid flood-prone areas.',
-    type: 'alert',
-    timestamp: '2024-01-14T06:30:00Z',
-    isRead: false
-  },
-  {
-    id: '3',
-    title: 'New Announcement: Waste Segregation',
-    message: 'New waste segregation guidelines will be implemented starting February 1, 2024.',
-    type: 'announcement',
-    timestamp: '2024-01-13T09:00:00Z',
-    isRead: true
-  },
-  {
-    id: '4',
-    title: 'Event Registration Confirmed',
-    message: 'You have successfully registered for the Community Clean-up Drive.',
-    type: 'confirmation',
-    timestamp: '2024-01-12T16:45:00Z',
-    isRead: true
-  },
-  {
-    id: '5',
-    title: 'Points Earned!',
-    message: 'You earned 50 points for participating in the Disaster Preparedness Seminar.',
-    type: 'points',
-    timestamp: '2024-01-10T17:00:00Z',
-    isRead: true
-  }
-];
+interface NewsAlert {
+  id: number;
+  title: string;
+  content: string;
+  type: 'news' | 'alert' | 'announcement';
+  imageUrl?: string;
+  authorId: number;
+  publishedAt: string;
+}
 
 export default function Notifications() {
+  // Fetch real notifications from backend
+  const { data: notifications = [], isLoading } = useQuery<NewsAlert[]>({
+    queryKey: ['/api/news'],
+  });
   const formatTimestamp = (timestamp: string) => {
     const now = new Date();
     const notificationTime = new Date(timestamp);
@@ -76,7 +47,7 @@ export default function Notifications() {
     }
   };
 
-  const unreadCount = sampleNotifications.filter(n => !n.isRead).length;
+  const unreadCount = notifications.length;
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -103,51 +74,63 @@ export default function Notifications() {
 
         {/* Notifications List */}
         <div className="space-y-3">
-          {sampleNotifications.map((notification) => (
-            <Card 
-              key={notification.id} 
-              className={`${notification.isRead ? 'bg-muted/30' : 'border-primary/20 bg-primary/5'} transition-colors`}
-            >
+          {isLoading ? (
+            <Card>
               <CardContent className="p-4">
-                <div className="flex items-start space-x-3">
-                  <div className="flex-shrink-0 mt-0.5">
-                    {getNotificationIcon(notification.type)}
-                  </div>
-                  
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-start justify-between">
-                      <h4 className={`text-sm font-medium ${!notification.isRead ? 'text-foreground' : 'text-muted-foreground'}`}>
-                        {notification.title}
-                      </h4>
-                      <div className="flex items-center ml-2">
-                        {!notification.isRead && (
-                          <div className="w-2 h-2 bg-primary rounded-full mr-2"></div>
-                        )}
-                        <div className="flex items-center text-xs text-muted-foreground">
-                          <Clock className="h-3 w-3 mr-1" />
-                          {formatTimestamp(notification.timestamp)}
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <p className={`text-sm mt-1 ${!notification.isRead ? 'text-foreground' : 'text-muted-foreground'}`}>
-                      {notification.message}
-                    </p>
-                    
-                    <Badge 
-                      variant="outline" 
-                      className="mt-2 text-xs capitalize"
-                    >
-                      {notification.type}
-                    </Badge>
-                  </div>
-                </div>
+                <p className="text-sm text-muted-foreground">Loading notifications...</p>
               </CardContent>
             </Card>
-          ))}
+          ) : notifications.length === 0 ? (
+            <Card>
+              <CardContent className="p-4">
+                <p className="text-sm text-muted-foreground">No notifications yet.</p>
+              </CardContent>
+            </Card>
+          ) : (
+            notifications.map((notification) => (
+              <Card 
+                key={notification.id} 
+                className="border-primary/20 bg-primary/5 transition-colors"
+              >
+                <CardContent className="p-4">
+                  <div className="flex items-start space-x-3">
+                    <div className="flex-shrink-0 mt-0.5">
+                      {getNotificationIcon(notification.type)}
+                    </div>
+                    
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between">
+                        <h4 className="text-sm font-medium text-foreground">
+                          {notification.title}
+                        </h4>
+                        <div className="flex items-center ml-2">
+                          <div className="w-2 h-2 bg-primary rounded-full mr-2"></div>
+                          <div className="flex items-center text-xs text-muted-foreground">
+                            <Clock className="h-3 w-3 mr-1" />
+                            {formatTimestamp(notification.publishedAt)}
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <p className="text-sm mt-1 text-foreground">
+                        {notification.content}
+                      </p>
+                      
+                      <Badge 
+                        variant="outline" 
+                        className="mt-2 text-xs capitalize"
+                      >
+                        {notification.type}
+                      </Badge>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))
+          )}
         </div>
 
-        {sampleNotifications.length === 0 && (
+        {notifications.length === 0 && (
           <div className="text-center py-12">
             <Bell className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
             <h3 className="text-lg font-semibold mb-2">No notifications</h3>

@@ -58,6 +58,12 @@ export default function Rewards() {
     enabled: !!user?.id,
   });
 
+  // Fetch user info for current points
+  const { data: userInfo } = useQuery({
+    queryKey: ['/api/users', user?.id],
+    enabled: !!user?.id,
+  });
+
   // Redeem reward mutation
   const redeemMutation = useMutation({
     mutationFn: (rewardId: number) => apiRequest(`/api/rewards/${rewardId}/claim`, {
@@ -69,6 +75,12 @@ export default function Rewards() {
       queryClient.invalidateQueries({ queryKey: ['/api/users', user?.id, 'reward-claims'] });
       queryClient.invalidateQueries({ queryKey: ['/api/rewards'] });
       queryClient.invalidateQueries({ queryKey: ['/api/users', user?.id] });
+      queryClient.invalidateQueries({ queryKey: ['/api/users', user?.id, 'transactions'] });
+      
+      // Update local user state
+      const updatedUser = authStore.getCurrentUser();
+      setUser(updatedUser);
+      
       toast({
         title: "Success!",
         description: "Reward claimed successfully! Check your history for the claim code.",
@@ -99,10 +111,11 @@ export default function Rewards() {
       return;
     }
 
-    if (user.points < reward.pointsCost) {
+    const currentPoints = userInfo?.points || user.points;
+    if (currentPoints < reward.pointsCost) {
       toast({
         title: "Insufficient Points",
-        description: `You need ${reward.pointsCost - user.points} more points to redeem this reward.`,
+        description: `You need ${reward.pointsCost - currentPoints} more points to redeem this reward.`,
         variant: "destructive",
       });
       return;
@@ -182,7 +195,7 @@ export default function Rewards() {
         <div className="flex items-center justify-between bg-gradient-secondary p-4 rounded-lg text-secondary-foreground">
           <div>
             <p className="text-sm opacity-80">Available Points</p>
-            <p className="text-2xl font-bold">{user.points}</p>
+            <p className="text-2xl font-bold">{userInfo?.points || user.points}</p>
           </div>
           <Button
             variant="outline"

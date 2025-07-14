@@ -298,6 +298,49 @@ export default function OngoingEvents() {
                   </Button>
                 </div>
               )}
+              
+              {selectedParticipant.status === 'approved' && (
+                <div className="flex space-x-2">
+                  <Button 
+                    className="flex-1"
+                    disabled={true}
+                    variant="outline"
+                  >
+                    <CheckCircle className="h-4 w-4 mr-2" />
+                    Points Granted
+                  </Button>
+                  <Button 
+                    variant="outline"
+                    className="flex-1"
+                    disabled={true}
+                  >
+                    <XCircle className="h-4 w-4 mr-2" />
+                    Decline
+                  </Button>
+                </div>
+              )}
+              
+              {selectedParticipant.status === 'declined' && (
+                <div className="flex space-x-2">
+                  <Button 
+                    className="flex-1"
+                    disabled={true}
+                    variant="outline"
+                  >
+                    <CheckCircle className="h-4 w-4 mr-2" />
+                    Grant Points
+                  </Button>
+                  <Button 
+                    variant="outline"
+                    className="flex-1"
+                    disabled={true}
+                  >
+                    <XCircle className="h-4 w-4 mr-2" />
+                    Declined
+                  </Button>
+                </div>
+              )}
+              
               {selectedParticipant.pointsAwarded && (
                 <div className="p-3 bg-green-50 rounded-lg">
                   <p className="text-sm text-green-700">
