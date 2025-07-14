@@ -288,14 +288,14 @@ export default function Rewards() {
             <DialogTitle>Reward History</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            {userTransactions.filter(t => t.type === 'redeemed').length === 0 ? (
+            {userTransactions?.filter(t => t.type === 'redeemed').length === 0 ? (
               <div className="text-center py-8">
                 <Gift className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
                 <p className="text-muted-foreground">No rewards redeemed yet</p>
               </div>
             ) : (
               userTransactions
-                .filter(transaction => transaction.type === 'redeemed')
+                ?.filter(transaction => transaction.type === 'redeemed')
                 .map((transaction) => (
                   <Card key={transaction.id}>
                     <CardContent className="p-4">
@@ -314,7 +314,7 @@ export default function Rewards() {
                         </div>
                         <div className="text-right">
                           <p className="text-sm font-medium text-red-600">
-                            {transaction.amount} pts
+                            {Math.abs(transaction.amount)} pts
                           </p>
                           <p className="text-xs text-muted-foreground mt-1">
                             Points used
