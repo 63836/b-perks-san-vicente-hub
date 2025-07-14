@@ -30,7 +30,7 @@ export default function Login() {
     setIsLoading(true);
 
     try {
-      const user = authStore.login(username, password);
+      const user = await authStore.login(username, password);
       
       toast({
         title: "Welcome back!",

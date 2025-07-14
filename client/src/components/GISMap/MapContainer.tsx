@@ -439,18 +439,23 @@ const GISMap: React.FC<GISMapProps> = ({ className, activeLayersState = {} }) =>
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
 
-    // Fetch real reports from the database
-    const fetchReports = async () => {
+    // Fetch real data from the database
+    const fetchData = async () => {
       try {
-        const response = await fetch('/api/reports');
-        const reports = await response.json();
+        // Fetch real reports
+        const reportsResponse = await fetch('/api/reports');
+        const reports = await reportsResponse.json();
         setRealReports(reports);
+        
+        // Fetch real events  
+        const eventsResponse = await fetch('/api/events');
+        const events = await eventsResponse.json();
         
         // Convert real reports to map format
         const convertedReports = reports.map((report: any) => ({
           id: report.id.toString(),
-          lat: report.locationLat || 16.4023,
-          lng: report.locationLng || 120.5960,
+          lat: report.lat || 16.4023,
+          lng: report.lng || 120.5960,
           title: report.title,
           description: report.description,
           status: report.status || 'pending',
@@ -458,17 +463,30 @@ const GISMap: React.FC<GISMapProps> = ({ className, activeLayersState = {} }) =>
           createdAt: report.createdAt || new Date().toISOString()
         }));
         
-        // Update map data with real reports
+        // Convert real events to map format (only active events)
+        const convertedEvents = events
+          .filter((event: any) => event.isActive)
+          .map((event: any) => ({
+            id: event.id.toString(),
+            lat: event.lat || 16.4023,
+            lng: event.lng || 120.5960,
+            title: event.title,
+            description: event.description,
+            date: new Date(event.startDate).toLocaleDateString()
+          }));
+        
+        // Update map data with real data
         setMapData(prev => ({
           ...prev,
-          reports: convertedReports
+          reports: convertedReports,
+          events: convertedEvents
         }));
       } catch (error) {
-        console.error('Failed to fetch reports:', error);
+        console.error('Failed to fetch data:', error);
       }
     };
 
-    fetchReports();
+    fetchData();
 
     return () => {
       window.removeEventListener('online', handleOnline);

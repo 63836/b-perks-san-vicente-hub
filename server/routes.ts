@@ -61,7 +61,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ error: "Invalid credentials" });
       }
       
-      res.json({ user: { ...user, password: undefined } });
+      res.json({ ...user, password: undefined });
     } catch (error) {
       res.status(500).json({ error: "Login failed" });
     }

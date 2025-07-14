@@ -83,7 +83,27 @@ class AuthStore {
     return newUser;
   }
 
-  login(username: string, password: string): User {
+  async login(username: string, password: string): Promise<User> {
+    // Try backend API first
+    try {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        const user = data.user || data;
+        this.currentUser = user;
+        this.saveToStorage();
+        return user;
+      }
+    } catch (error) {
+      console.log('Backend login failed, trying local storage');
+    }
+    
+    // Fallback to local storage
     const user = this.users.find(u => u.username === username && u.password === password);
     if (!user) {
       throw new Error('Invalid credentials');

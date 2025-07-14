@@ -71,6 +71,7 @@ export default function Events() {
     }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/users', user?.id, 'events'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/events'] });
       toast({
         title: "Success!",
         description: "You have successfully joined the event!",
