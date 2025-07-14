@@ -25,6 +25,7 @@ Preferred communication style: Simple, everyday language.
   - Event participation (users can join events)
   - News alert creation (published successfully)
 - **Database Location**: All data stored in `data/local_database/` with automatic updates
+- **Persistence Fixed**: Users now persist across server restarts (loads from files on startup)
 - **Migration Benefits**: No external database dependency, enhanced security, improved performance
 
 ## System Architecture

@@ -30,6 +30,42 @@ USER ACCOUNTS:
 - Role: Resident
 - User ID: 3
 
-Total Users: 3
+- Username: directtest
+- Password: direct123
+- Name: Direct File Test
+- Age: 26
+- Phone: 09123123123
+- Points: 0
+- Role: Resident
+- User ID: 18
+
+- Username: webtest
+- Password: web123
+- Name: Web Interface Test
+- Age: 32
+- Phone: 09444555666
+- Points: 0
+- Role: Resident
+- User ID: 19
+
+- Username: persistent
+- Password: persist123
+- Name: Persistent User
+- Age: 30
+- Phone: 09777888999
+- Points: 0
+- Role: Resident
+- User ID: 26
+
+- Username: finaltest
+- Password: final123
+- Name: Final Test User
+- Age: 28
+- Phone: 09333444555
+- Points: 0
+- Role: Resident
+- User ID: 33
+
+Total Users: 7
 Admin Users: 1
-Regular Users: 2
+Regular Users: 6

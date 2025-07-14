@@ -42,7 +42,187 @@ export class FileStorageAdapter implements IStorage {
     this.currentId = 1;
     this.dataDir = path.join(process.cwd(), 'data', 'local_database');
     
-    this.initializeSampleData();
+    this.initializeFromFiles();
+  }
+
+  private async initializeFromFiles() {
+    try {
+      await this.loadExistingData();
+    } catch (error) {
+      console.log('No existing data found, initializing with sample data');
+      this.initializeSampleData();
+    }
+  }
+
+  private async loadExistingData() {
+    await this.ensureDataDir();
+    
+    // Try to load existing data from files
+    try {
+      const usersFile = await fs.readFile(path.join(this.dataDir, 'users.txt'), 'utf-8');
+      // Parse users from file if it exists and has data
+      if (usersFile && usersFile.includes('User ID:')) {
+        // File exists with data, load existing data and continue with highest ID
+        this.loadUsersFromFile(usersFile);
+      } else {
+        throw new Error('No valid users file found');
+      }
+    } catch (error) {
+      throw new Error('Failed to load existing data');
+    }
+  }
+
+  private loadUsersFromFile(fileContent: string) {
+    // Extract user data from the formatted text file
+    const lines = fileContent.split('\n');
+    let maxId = 0;
+    
+    // Parse admin users
+    let currentUser: Partial<User> = {};
+    let inUserSection = false;
+    
+    for (const line of lines) {
+      if (line.includes('ADMIN ACCOUNTS:') || line.includes('USER ACCOUNTS:')) {
+        inUserSection = true;
+        continue;
+      }
+      
+      if (line.includes('Total Users:')) {
+        break;
+      }
+      
+      if (inUserSection && line.trim()) {
+        if (line.includes('- Username:')) {
+          currentUser.username = line.split(': ')[1];
+        } else if (line.includes('- Password:')) {
+          currentUser.password = line.split(': ')[1];
+        } else if (line.includes('- Name:')) {
+          currentUser.name = line.split(': ')[1];
+        } else if (line.includes('- Age:')) {
+          currentUser.age = parseInt(line.split(': ')[1]);
+        } else if (line.includes('- Phone:')) {
+          currentUser.phoneNumber = line.split(': ')[1];
+        } else if (line.includes('- Points:')) {
+          currentUser.points = parseInt(line.split(': ')[1]);
+        } else if (line.includes('- Role:')) {
+          currentUser.isAdmin = line.split(': ')[1] === 'Admin';
+        } else if (line.includes('- User ID:')) {
+          const userId = parseInt(line.split(': ')[1]);
+          currentUser.id = userId;
+          maxId = Math.max(maxId, userId);
+          
+          // Complete user object
+          const user: User = {
+            ...currentUser,
+            createdAt: new Date(),
+          } as User;
+          
+          this.users.set(user.id, user);
+          currentUser = {};
+        }
+      }
+    }
+    
+    // Set current ID to be higher than any existing ID
+    this.currentId = maxId + 1;
+    
+    // If no users were loaded, initialize with sample data
+    if (this.users.size === 0) {
+      this.initializeSampleData();
+    } else {
+      // Load other data types or initialize them if they don't exist
+      this.initializeOtherData();
+    }
+  }
+
+  private initializeOtherData() {
+    // Initialize sample rewards, events, etc. if they don't exist in files
+    if (this.rewards.size === 0) {
+      const rewards = [
+        {
+          id: this.currentId++,
+          title: "Eco-Friendly Water Bottle",
+          description: "BPA-free stainless steel water bottle with Barangay San Vicente logo",
+          pointsCost: 100,
+          imageUrl: "/placeholder.svg",
+          isAvailable: true,
+          category: "Environment",
+          createdAt: new Date(),
+        },
+        {
+          id: this.currentId++,
+          title: "Community Garden Seeds Pack",
+          description: "Vegetable seeds for home gardening - tomato, lettuce, herbs",
+          pointsCost: 75,
+          imageUrl: "/placeholder.svg",
+          isAvailable: true,
+          category: "Gardening",
+          createdAt: new Date(),
+        },
+        {
+          id: this.currentId++,
+          title: "Barangay T-Shirt",
+          description: "Official Barangay San Vicente t-shirt, available in all sizes",
+          pointsCost: 150,
+          imageUrl: "/placeholder.svg",
+          isAvailable: true,
+          category: "Apparel",
+          createdAt: new Date(),
+        },
+        {
+          id: this.currentId++,
+          title: "Emergency Flashlight",
+          description: "LED flashlight with hand crank for emergencies",
+          pointsCost: 200,
+          imageUrl: "/placeholder.svg",
+          isAvailable: true,
+          category: "Safety",
+          createdAt: new Date(),
+        },
+        {
+          id: this.currentId++,
+          title: "Reusable Shopping Bag",
+          description: "Durable canvas shopping bag to reduce plastic use",
+          pointsCost: 50,
+          imageUrl: "/placeholder.svg",
+          isAvailable: true,
+          category: "Environment",
+          createdAt: new Date(),
+        }
+      ];
+
+      rewards.forEach(reward => {
+        this.rewards.set(reward.id, reward as Reward);
+      });
+    }
+
+    // Initialize other sample data if needed
+    if (this.events.size === 0) {
+      const events = [
+        {
+          id: this.currentId++,
+          title: "Community Clean-Up Drive",
+          description: "Join us for a neighborhood cleanup to keep our barangay beautiful and earn points!",
+          location: "Barangay San Vicente Plaza",
+          lat: 16.4023,
+          lng: 120.5960,
+          pointsReward: 50,
+          startDate: new Date('2025-07-20T08:00:00'),
+          endDate: new Date('2025-07-20T12:00:00'),
+          isActive: true,
+          imageUrl: "/placeholder.svg",
+          maxParticipants: 50,
+          createdAt: new Date(),
+        }
+      ];
+
+      events.forEach(event => {
+        this.events.set(event.id, event as Event);
+      });
+    }
+
+    // Save initial state
+    this.saveAllData();
   }
 
   private async ensureDataDir() {

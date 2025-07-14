@@ -1,14 +1,14 @@
 B-PERKS LOCAL DATABASE SUMMARY
 ==============================
-Last Updated: 7/14/2025 at 1:13:42 AM
+Last Updated: 7/14/2025 at 1:17:04 AM
 System: Barangay San Vicente Community Engagement Platform
 
 DATABASE STATISTICS:
-- Total Users: 3 (1 Admin, 2 Residents)
-- Active Events: 3
+- Total Users: 7 (1 Admin, 6 Residents)
+- Active Events: 1
 - Available Rewards: 5
-- Pending Reports: 3
-- News & Alerts: 3
+- Pending Reports: 0
+- News & Alerts: 0
 
 SYSTEM STATUS:
 - All data persisted to local text files
