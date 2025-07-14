@@ -413,4 +413,6 @@ export class MemStorage implements IStorage {
 }
 
 import { LocalStorageAdapter } from "./localStorageAdapter";
-export const storage = new LocalStorageAdapter();
+import { FileStorageAdapter } from "./fileStorageAdapter";
+
+export const storage = new FileStorageAdapter();

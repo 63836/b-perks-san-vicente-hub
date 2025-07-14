@@ -43,4 +43,4 @@ Image: /placeholder.svg
 
 Total Rewards: 5
 Available Rewards: 5
-Categories: Environment (2), Gardening (1), Apparel (1), Safety (1)
+Categories: Environment, Gardening, Apparel, Safety

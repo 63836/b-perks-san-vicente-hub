@@ -1,7 +1,7 @@
 LOGIN CREDENTIALS - B-PERKS SYSTEM
 =======================================
 
-ADMIN ACCOUNT:
+ADMIN ACCOUNTS:
 - Username: admin
 - Password: admin123
 - Name: Administrator

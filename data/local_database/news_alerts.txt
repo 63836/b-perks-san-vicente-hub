@@ -7,7 +7,7 @@ Content: Monthly barangay assembly meeting scheduled for July 28, 2025 at 7:00 P
 Type: Announcement
 Author: Administrator (ID: 1)
 Image: /placeholder.svg
-Date Published: July 14, 2025
+Date Published: 7/14/2025
 
 ALERT ID: 16
 Title: Water Interruption Notice
@@ -15,7 +15,7 @@ Content: Water service will be temporarily interrupted on July 22, 2025 from 8:0
 Type: Alert
 Author: Administrator (ID: 1)
 Image: /placeholder.svg
-Date Published: July 14, 2025
+Date Published: 7/14/2025
 
 NEWS ID: 17
 Title: New Health Center Services
@@ -23,7 +23,7 @@ Content: The barangay health center now offers free blood pressure monitoring ev
 Type: News
 Author: Administrator (ID: 1)
 Image: /placeholder.svg
-Date Published: July 14, 2025
+Date Published: 7/14/2025
 
 Total Posts: 3
 Announcements: 1

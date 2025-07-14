@@ -5,10 +5,10 @@ EVENT ID: 9
 Title: Community Clean-Up Drive
 Description: Join us for a neighborhood cleanup to keep our barangay beautiful and earn points!
 Location: Barangay San Vicente Plaza
-Coordinates: 16.4023, 120.5960
+Coordinates: 16.4023, 120.596
 Points Reward: 50
-Start Date: July 20, 2025 at 8:00 AM
-End Date: July 20, 2025 at 12:00 PM
+Start Date: 7/20/2025 at 8:00:00 AM
+End Date: 7/20/2025 at 12:00:00 PM
 Status: Active
 Max Participants: 50
 Image: /placeholder.svg
@@ -17,10 +17,10 @@ EVENT ID: 10
 Title: Disaster Preparedness Seminar
 Description: Learn essential emergency preparedness skills and earn points for attending
 Location: Barangay Hall Conference Room
-Coordinates: 16.4020, 120.5955
+Coordinates: 16.402, 120.5955
 Points Reward: 75
-Start Date: July 25, 2025 at 2:00 PM
-End Date: July 25, 2025 at 5:00 PM
+Start Date: 7/25/2025 at 2:00:00 PM
+End Date: 7/25/2025 at 5:00:00 PM
 Status: Active
 Max Participants: 30
 Image: /placeholder.svg
@@ -31,8 +31,8 @@ Description: Help restore our environment by planting trees in the community par
 Location: San Vicente Community Park
 Coordinates: 16.4025, 120.5965
 Points Reward: 100
-Start Date: July 30, 2025 at 7:00 AM
-End Date: July 30, 2025 at 11:00 AM
+Start Date: 7/30/2025 at 7:00:00 AM
+End Date: 7/30/2025 at 11:00:00 AM
 Status: Active
 Max Participants: 40
 Image: /placeholder.svg
