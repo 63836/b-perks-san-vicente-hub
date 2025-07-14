@@ -19,7 +19,7 @@ import CreateAnnouncement from "./pages/admin/CreateAnnouncement";
 import ManageRewards from "./pages/admin/ManageRewards";
 import OngoingEvents from "./pages/admin/OngoingEvents";
 import ReviewReports from "./pages/admin/ReviewReports";
-import ManagePuroks from "./pages/admin/ManagePuroks";
+
 import NotFound from "./pages/NotFound";
 
 const App = () => (
@@ -45,7 +45,7 @@ const App = () => (
           <Route path="/admin/manage-rewards" component={ManageRewards} />
           <Route path="/admin/ongoing-events" component={OngoingEvents} />
           <Route path="/admin/reports" component={ReviewReports} />
-          <Route path="/admin/manage-puroks" component={ManagePuroks} />
+
           <Route component={NotFound} />
         </Switch>
       </Router>

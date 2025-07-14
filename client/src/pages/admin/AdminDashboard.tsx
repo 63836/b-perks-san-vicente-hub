@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useLocation } from 'wouter';
+import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Header } from '@/components/ui/navigation';
@@ -21,12 +22,29 @@ export default function AdminDashboard() {
   const { toast } = useToast();
   const [user, setUser] = useState(authStore.getCurrentUser());
 
-  // Mock admin data
+  // Fetch real data from API
+  const { data: users = [] } = useQuery({
+    queryKey: ['/api/users'],
+  });
+
+  const { data: events = [] } = useQuery({
+    queryKey: ['/api/events'],
+  });
+
+  const { data: reports = [] } = useQuery({
+    queryKey: ['/api/reports'],
+  });
+
+  const { data: rewards = [] } = useQuery({
+    queryKey: ['/api/rewards'],
+  });
+
+  // Calculate accurate stats from local data
   const adminStats = {
-    totalUsers: 0,
-    pendingReports: 0,
-    activeEvents: 3,
-    totalRewards: 12
+    totalUsers: users.length,
+    pendingReports: reports.filter((report: any) => report.status === 'pending').length,
+    activeEvents: events.filter((event: any) => event.isActive).length,
+    totalRewards: rewards.filter((reward: any) => reward.isAvailable).length
   };
 
   useEffect(() => {
@@ -150,15 +168,6 @@ export default function AdminDashboard() {
                   {adminStats.pendingReports}
                 </span>
               )}
-            </Button>
-            
-            <Button 
-              className="w-full justify-start" 
-              variant="outline"
-              onClick={() => setLocation('/admin/manage-puroks')}
-            >
-              <AlertTriangle className="h-4 w-4 mr-2" />
-              Manage Purok Boundaries
             </Button>
           </CardContent>
         </Card>

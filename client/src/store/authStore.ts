@@ -1,4 +1,5 @@
 import { User } from '@shared/schema';
+import { localStorageManager } from '@/utils/localStorage';
 
 class AuthStore {
   private static instance: AuthStore;
@@ -6,6 +7,7 @@ class AuthStore {
   private users: User[] = [];
 
   private constructor() {
+    localStorageManager.initialize();
     this.loadFromStorage();
   }
 

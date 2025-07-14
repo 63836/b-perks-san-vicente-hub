@@ -8,6 +8,18 @@ B-Perks is a comprehensive community engagement platform designed for Barangay S
 
 Preferred communication style: Simple, everyday language.
 
+## Recent Changes (July 14, 2025)
+
+- Removed Manage Purok Boundaries functionality as requested
+- Implemented full local storage system without database dependency
+- Admin dashboard now shows accurate counts from locally stored data:
+  - Total Users: actual registered users count
+  - Pending Reports: reports with 'pending' status
+  - Active Events: events marked as active
+  - Available Rewards: rewards marked as available
+- Fixed Rewards section errors with proper null checks
+- Enhanced reward claim system with clickable verification codes
+
 ## System Architecture
 
 ### Frontend Architecture

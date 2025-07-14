@@ -1,12 +1,4 @@
 import { 
-  users, 
-  rewards, 
-  rewardClaims, 
-  events, 
-  eventParticipants, 
-  reports, 
-  newsAlerts, 
-  transactions,
   type User, 
   type InsertUser, 
   type Reward, 
@@ -21,58 +13,10 @@ import {
   type InsertNewsAlert, 
   type Transaction 
 } from "@shared/schema";
+import { IStorage } from "./storage";
 
-export interface IStorage {
-  // Users
-  getUser(id: number): Promise<User | undefined>;
-  getUserByUsername(username: string): Promise<User | undefined>;
-  createUser(user: InsertUser): Promise<User>;
-  updateUserPoints(userId: number, points: number): Promise<User>;
-  getAllUsers(): Promise<User[]>;
-  
-  // Rewards
-  getAllRewards(): Promise<Reward[]>;
-  getReward(id: number): Promise<Reward | undefined>;
-  createReward(reward: InsertReward): Promise<Reward>;
-  updateReward(id: number, reward: Partial<Reward>): Promise<Reward>;
-  deleteReward(id: number): Promise<boolean>;
-  
-  // Reward Claims
-  createRewardClaim(userId: number, rewardId: number): Promise<RewardClaim>;
-  getRewardClaims(): Promise<RewardClaim[]>;
-  getUserRewardClaims(userId: number): Promise<RewardClaim[]>;
-  updateRewardClaimStatus(claimId: number, status: string, verifiedBy?: number): Promise<RewardClaim>;
-  getRewardClaimByCode(claimCode: string): Promise<RewardClaim | undefined>;
-  
-  // Events
-  getAllEvents(): Promise<Event[]>;
-  getEvent(id: number): Promise<Event | undefined>;
-  createEvent(event: InsertEvent): Promise<Event>;
-  updateEvent(id: number, event: Partial<Event>): Promise<Event>;
-  deleteEvent(id: number): Promise<boolean>;
-  
-  // Event Participants
-  joinEvent(eventId: number, userId: number): Promise<EventParticipant>;
-  getEventParticipants(eventId: number): Promise<EventParticipant[]>;
-  getUserEventParticipations(userId: number): Promise<EventParticipant[]>;
-  updateEventParticipant(id: number, updates: Partial<EventParticipant>): Promise<EventParticipant>;
-  
-  // Reports
-  getAllReports(): Promise<Report[]>;
-  getReport(id: number): Promise<Report | undefined>;
-  createReport(report: InsertReport & { userId: number }): Promise<Report>;
-  updateReport(id: number, report: Partial<Report>): Promise<Report>;
-  
-  // News & Alerts
-  getAllNewsAlerts(): Promise<NewsAlert[]>;
-  createNewsAlert(newsAlert: InsertNewsAlert & { authorId: number }): Promise<NewsAlert>;
-  
-  // Transactions
-  createTransaction(transaction: Omit<Transaction, 'id' | 'timestamp'>): Promise<Transaction>;
-  getUserTransactions(userId: number): Promise<Transaction[]>;
-}
-
-export class MemStorage implements IStorage {
+// Local storage adapter for client-side storage
+export class LocalStorageAdapter implements IStorage {
   private users: Map<number, User>;
   private rewards: Map<number, Reward>;
   private rewardClaims: Map<number, RewardClaim>;
@@ -94,7 +38,6 @@ export class MemStorage implements IStorage {
     this.transactions = new Map();
     this.currentId = 1;
     
-    // Initialize with sample data
     this.initializeSampleData();
   }
 
@@ -107,7 +50,7 @@ export class MemStorage implements IStorage {
       name: "Administrator",
       age: 30,
       phoneNumber: "09123456789",
-      points: 0,
+      points: 1000,
       isAdmin: true,
       createdAt: new Date(),
     };
@@ -143,55 +86,64 @@ export class MemStorage implements IStorage {
         id: this.currentId++,
         title: "Community Garden Starter Kit",
         description: "Seeds and tools to start your own garden",
-        pointsCost: 200,
+        pointsCost: 150,
         imageUrl: null,
         isAvailable: true,
-        category: "Environment",
+        category: "Gardening",
         createdAt: new Date(),
       },
+      {
+        id: this.currentId++,
+        title: "Barangay T-Shirt",
+        description: "Official Barangay San Vicente t-shirt",
+        pointsCost: 75,
+        imageUrl: null,
+        isAvailable: true,
+        category: "Merchandise",
+        createdAt: new Date(),
+      }
     ];
-    
-    rewards.forEach(reward => this.rewards.set(reward.id, reward));
+
+    rewards.forEach(reward => {
+      this.rewards.set(reward.id, reward as Reward);
+    });
   }
 
-  // Users
+  // User methods
   async getUser(id: number): Promise<User | undefined> {
     return this.users.get(id);
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
-    );
+    return Array.from(this.users.values()).find(user => user.username === username);
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const id = this.currentId++;
     const user: User = { 
       ...insertUser, 
-      id,
+      id: this.currentId++,
       points: 0,
       isAdmin: false,
       createdAt: new Date()
     };
-    this.users.set(id, user);
+    this.users.set(user.id, user);
     return user;
   }
 
   async updateUserPoints(userId: number, points: number): Promise<User> {
     const user = this.users.get(userId);
-    if (!user) throw new Error("User not found");
+    if (!user) throw new Error('User not found');
     
-    const updatedUser = { ...user, points };
-    this.users.set(userId, updatedUser);
-    return updatedUser;
+    user.points = points;
+    this.users.set(userId, user);
+    return user;
   }
 
   async getAllUsers(): Promise<User[]> {
     return Array.from(this.users.values());
   }
 
-  // Rewards
+  // Reward methods
   async getAllRewards(): Promise<Reward[]> {
     return Array.from(this.rewards.values());
   }
@@ -201,20 +153,18 @@ export class MemStorage implements IStorage {
   }
 
   async createReward(reward: InsertReward): Promise<Reward> {
-    const id = this.currentId++;
     const newReward: Reward = {
       ...reward,
-      id,
-      isAvailable: true,
+      id: this.currentId++,
       createdAt: new Date(),
     };
-    this.rewards.set(id, newReward);
+    this.rewards.set(newReward.id, newReward);
     return newReward;
   }
 
   async updateReward(id: number, reward: Partial<Reward>): Promise<Reward> {
     const existing = this.rewards.get(id);
-    if (!existing) throw new Error("Reward not found");
+    if (!existing) throw new Error('Reward not found');
     
     const updated = { ...existing, ...reward };
     this.rewards.set(id, updated);
@@ -225,23 +175,19 @@ export class MemStorage implements IStorage {
     return this.rewards.delete(id);
   }
 
-  // Reward Claims
+  // Reward Claims methods
   async createRewardClaim(userId: number, rewardId: number): Promise<RewardClaim> {
-    const id = this.currentId++;
-    const claimCode = `BP-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
-    
     const claim: RewardClaim = {
-      id,
+      id: this.currentId++,
       userId,
       rewardId,
-      claimCode,
-      status: "unclaimed",
+      claimCode: `CLAIM-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      status: 'unclaimed',
       claimedAt: new Date(),
       verifiedAt: null,
       verifiedBy: null,
     };
-    
-    this.rewardClaims.set(id, claim);
+    this.rewardClaims.set(claim.id, claim);
     return claim;
   }
 
@@ -255,24 +201,23 @@ export class MemStorage implements IStorage {
 
   async updateRewardClaimStatus(claimId: number, status: string, verifiedBy?: number): Promise<RewardClaim> {
     const claim = this.rewardClaims.get(claimId);
-    if (!claim) throw new Error("Claim not found");
+    if (!claim) throw new Error('Claim not found');
     
-    const updated = {
-      ...claim,
-      status,
-      verifiedAt: status === "claimed" ? new Date() : null,
-      verifiedBy: verifiedBy || null,
-    };
+    claim.status = status as any;
+    if (verifiedBy) {
+      claim.verifiedBy = verifiedBy;
+      claim.verifiedAt = new Date();
+    }
     
-    this.rewardClaims.set(claimId, updated);
-    return updated;
+    this.rewardClaims.set(claimId, claim);
+    return claim;
   }
 
   async getRewardClaimByCode(claimCode: string): Promise<RewardClaim | undefined> {
     return Array.from(this.rewardClaims.values()).find(claim => claim.claimCode === claimCode);
   }
 
-  // Events
+  // Event methods
   async getAllEvents(): Promise<Event[]> {
     return Array.from(this.events.values());
   }
@@ -282,20 +227,18 @@ export class MemStorage implements IStorage {
   }
 
   async createEvent(event: InsertEvent): Promise<Event> {
-    const id = this.currentId++;
     const newEvent: Event = {
       ...event,
-      id,
-      isActive: true,
+      id: this.currentId++,
       createdAt: new Date(),
     };
-    this.events.set(id, newEvent);
+    this.events.set(newEvent.id, newEvent);
     return newEvent;
   }
 
   async updateEvent(id: number, event: Partial<Event>): Promise<Event> {
     const existing = this.events.get(id);
-    if (!existing) throw new Error("Event not found");
+    if (!existing) throw new Error('Event not found');
     
     const updated = { ...existing, ...event };
     this.events.set(id, updated);
@@ -306,26 +249,18 @@ export class MemStorage implements IStorage {
     return this.events.delete(id);
   }
 
-  // Event Participants
+  // Event Participants methods
   async joinEvent(eventId: number, userId: number): Promise<EventParticipant> {
-    const id = this.currentId++;
     const participant: EventParticipant = {
-      id,
+      id: this.currentId++,
       eventId,
       userId,
       joinedAt: new Date(),
-      proofType: null,
-      proofUrl: null,
-      proofFileName: null,
-      proofFileSize: null,
-      submittedAt: null,
-      status: "registered",
+      status: 'registered',
+      proofSubmitted: null,
       pointsAwarded: null,
-      reviewedAt: null,
-      reviewedBy: null,
     };
-    
-    this.eventParticipants.set(id, participant);
+    this.eventParticipants.set(participant.id, participant);
     return participant;
   }
 
@@ -339,14 +274,14 @@ export class MemStorage implements IStorage {
 
   async updateEventParticipant(id: number, updates: Partial<EventParticipant>): Promise<EventParticipant> {
     const existing = this.eventParticipants.get(id);
-    if (!existing) throw new Error("Participant not found");
+    if (!existing) throw new Error('Participant not found');
     
     const updated = { ...existing, ...updates };
     this.eventParticipants.set(id, updated);
     return updated;
   }
 
-  // Reports
+  // Report methods
   async getAllReports(): Promise<Report[]> {
     return Array.from(this.reports.values());
   }
@@ -356,54 +291,48 @@ export class MemStorage implements IStorage {
   }
 
   async createReport(report: InsertReport & { userId: number }): Promise<Report> {
-    const id = this.currentId++;
     const newReport: Report = {
       ...report,
-      id,
-      status: "pending",
-      submittedAt: new Date(),
-      reviewedAt: null,
-      reviewedBy: null,
-      resolvedAt: null,
+      id: this.currentId++,
+      status: 'pending',
+      createdAt: new Date(),
     };
-    this.reports.set(id, newReport);
+    this.reports.set(newReport.id, newReport);
     return newReport;
   }
 
   async updateReport(id: number, report: Partial<Report>): Promise<Report> {
     const existing = this.reports.get(id);
-    if (!existing) throw new Error("Report not found");
+    if (!existing) throw new Error('Report not found');
     
     const updated = { ...existing, ...report };
     this.reports.set(id, updated);
     return updated;
   }
 
-  // News & Alerts
+  // News & Alerts methods
   async getAllNewsAlerts(): Promise<NewsAlert[]> {
     return Array.from(this.newsAlerts.values());
   }
 
   async createNewsAlert(newsAlert: InsertNewsAlert & { authorId: number }): Promise<NewsAlert> {
-    const id = this.currentId++;
     const newAlert: NewsAlert = {
       ...newsAlert,
-      id,
-      publishedAt: new Date(),
+      id: this.currentId++,
+      createdAt: new Date(),
     };
-    this.newsAlerts.set(id, newAlert);
+    this.newsAlerts.set(newAlert.id, newAlert);
     return newAlert;
   }
 
-  // Transactions
+  // Transaction methods
   async createTransaction(transaction: Omit<Transaction, 'id' | 'timestamp'>): Promise<Transaction> {
-    const id = this.currentId++;
     const newTransaction: Transaction = {
       ...transaction,
-      id,
+      id: this.currentId++,
       timestamp: new Date(),
     };
-    this.transactions.set(id, newTransaction);
+    this.transactions.set(newTransaction.id, newTransaction);
     return newTransaction;
   }
 
@@ -411,6 +340,3 @@ export class MemStorage implements IStorage {
     return Array.from(this.transactions.values()).filter(t => t.userId === userId);
   }
 }
-
-import { LocalStorageAdapter } from "./localStorageAdapter";
-export const storage = new LocalStorageAdapter();
