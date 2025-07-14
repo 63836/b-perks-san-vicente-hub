@@ -1,0 +1,46 @@
+REWARDS CATALOG - B-PERKS SYSTEM
+=================================
+
+REWARD ID: 4
+Title: Eco-Friendly Water Bottle
+Description: BPA-free stainless steel water bottle with Barangay San Vicente logo
+Points Cost: 100
+Category: Environment
+Status: Available
+Image: /placeholder.svg
+
+REWARD ID: 5
+Title: Community Garden Seeds Pack
+Description: Vegetable seeds for home gardening - tomato, lettuce, herbs
+Points Cost: 75
+Category: Gardening
+Status: Available
+Image: /placeholder.svg
+
+REWARD ID: 6
+Title: Barangay T-Shirt
+Description: Official Barangay San Vicente t-shirt, available in all sizes
+Points Cost: 150
+Category: Apparel
+Status: Available
+Image: /placeholder.svg
+
+REWARD ID: 7
+Title: Emergency Flashlight
+Description: LED flashlight with hand crank for emergencies
+Points Cost: 200
+Category: Safety
+Status: Available
+Image: /placeholder.svg
+
+REWARD ID: 8
+Title: Reusable Shopping Bag
+Description: Durable canvas shopping bag to reduce plastic use
+Points Cost: 50
+Category: Environment
+Status: Available
+Image: /placeholder.svg
+
+Total Rewards: 5
+Available Rewards: 5
+Categories: Environment (2), Gardening (1), Apparel (1), Safety (1)

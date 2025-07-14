@@ -1,0 +1,36 @@
+COMMUNITY REPORTS - B-PERKS SYSTEM
+===================================
+
+REPORT ID: 12
+User: Juan Dela Cruz (ID: 2)
+Title: Broken Street Light
+Description: The street light on Main Street has been broken for 3 days. It's dangerous at night.
+Location: Main Street near Sari-sari store
+Coordinates: 16.4018, 120.5950
+Status: Pending
+Image: /placeholder.svg
+Date Submitted: July 14, 2025
+
+REPORT ID: 13
+User: Maria Santos (ID: 3)
+Title: Clogged Drainage
+Description: The drainage system is clogged and causing flooding during heavy rains.
+Location: Purok 2 near basketball court
+Coordinates: 16.4030, 120.5970
+Status: Pending
+Image: /placeholder.svg
+Date Submitted: July 14, 2025
+
+REPORT ID: 14
+User: Juan Dela Cruz (ID: 2)
+Title: Stray Dogs Issue
+Description: There are several stray dogs in the area that might pose a health risk.
+Location: Near elementary school
+Coordinates: 16.4015, 120.5945
+Status: Pending
+Image: /placeholder.svg
+Date Submitted: July 14, 2025
+
+Total Reports: 3
+Pending Reports: 3
+Resolved Reports: 0

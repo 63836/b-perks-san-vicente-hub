@@ -1,0 +1,41 @@
+COMMUNITY EVENTS - B-PERKS SYSTEM
+==================================
+
+EVENT ID: 9
+Title: Community Clean-Up Drive
+Description: Join us for a neighborhood cleanup to keep our barangay beautiful and earn points!
+Location: Barangay San Vicente Plaza
+Coordinates: 16.4023, 120.5960
+Points Reward: 50
+Start Date: July 20, 2025 at 8:00 AM
+End Date: July 20, 2025 at 12:00 PM
+Status: Active
+Max Participants: 50
+Image: /placeholder.svg
+
+EVENT ID: 10
+Title: Disaster Preparedness Seminar
+Description: Learn essential emergency preparedness skills and earn points for attending
+Location: Barangay Hall Conference Room
+Coordinates: 16.4020, 120.5955
+Points Reward: 75
+Start Date: July 25, 2025 at 2:00 PM
+End Date: July 25, 2025 at 5:00 PM
+Status: Active
+Max Participants: 30
+Image: /placeholder.svg
+
+EVENT ID: 11
+Title: Tree Planting Activity
+Description: Help restore our environment by planting trees in the community park
+Location: San Vicente Community Park
+Coordinates: 16.4025, 120.5965
+Points Reward: 100
+Start Date: July 30, 2025 at 7:00 AM
+End Date: July 30, 2025 at 11:00 AM
+Status: Active
+Max Participants: 40
+Image: /placeholder.svg
+
+Total Events: 3
+Active Events: 3

@@ -1,0 +1,35 @@
+LOGIN CREDENTIALS - B-PERKS SYSTEM
+=======================================
+
+ADMIN ACCOUNT:
+- Username: admin
+- Password: admin123
+- Name: Administrator
+- Age: 30
+- Phone: 09123456789
+- Points: 1000
+- Role: Admin
+- User ID: 1
+
+USER ACCOUNTS:
+- Username: user1
+- Password: user123
+- Name: Juan Dela Cruz
+- Age: 25
+- Phone: 09987654321
+- Points: 150
+- Role: Resident
+- User ID: 2
+
+- Username: maria
+- Password: maria123
+- Name: Maria Santos
+- Age: 28
+- Phone: 09876543210
+- Points: 75
+- Role: Resident
+- User ID: 3
+
+Total Users: 3
+Admin Users: 1
+Regular Users: 2
