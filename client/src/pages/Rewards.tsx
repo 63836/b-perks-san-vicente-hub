@@ -213,9 +213,19 @@ export default function Rewards() {
                 </Badge>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="aspect-video bg-muted rounded-lg flex items-center justify-center">
-                  <Gift className="h-12 w-12 text-muted-foreground" />
-                </div>
+                {reward.imageUrl ? (
+                  <div className="aspect-video bg-muted rounded-lg overflow-hidden">
+                    <img 
+                      src={reward.imageUrl} 
+                      alt={reward.title}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                ) : (
+                  <div className="aspect-video bg-muted rounded-lg flex items-center justify-center">
+                    <Gift className="h-12 w-12 text-muted-foreground" />
+                  </div>
+                )}
                 
                 <p className="text-sm text-muted-foreground">
                   {reward.description}

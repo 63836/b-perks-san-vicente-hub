@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useLocation } from 'wouter';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -9,61 +10,80 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Header, BottomNavigation } from '@/components/ui/navigation';
 import { authStore } from '@/store/authStore';
 import { useToast } from '@/hooks/use-toast';
-import { Calendar, MapPin, Users, Trophy, Upload, CheckCircle } from 'lucide-react';
+import { apiRequest } from '@/lib/queryClient';
+import { Calendar, MapPin, Users, Trophy, Upload, CheckCircle, Clock } from 'lucide-react';
 
 interface Event {
-  id: string;
+  id: number;
   title: string;
   description: string;
   location: string;
-  date: string;
+  lat: number;
+  lng: number;
   pointsReward: number;
-  isRegistered: boolean;
-  hasSubmittedProof: boolean;
-  proofFile?: File;
+  startDate: string;
+  endDate: string;
+  isActive: boolean;
+  imageUrl?: string;
+  maxParticipants: number;
+  createdAt: string;
 }
 
-const sampleEvents: Event[] = [
-  {
-    id: '1',
-    title: 'Community Clean-up Drive',
-    description: 'Join us for a monthly community cleaning activity to keep our barangay clean and green.',
-    location: 'Barangay Center',
-    date: '2024-01-25',
-    pointsReward: 50,
-    isRegistered: false,
-    hasSubmittedProof: false
-  },
-  {
-    id: '2',
-    title: 'Disaster Preparedness Seminar',
-    description: 'Learn essential skills for disaster preparedness and emergency response.',
-    location: 'Community Hall',
-    date: '2024-01-30',
-    pointsReward: 30,
-    isRegistered: true,
-    hasSubmittedProof: false
-  },
-  {
-    id: '3',
-    title: 'Tree Planting Activity',
-    description: 'Help make our barangay greener by participating in our tree planting initiative.',
-    location: 'Barangay Park',
-    date: '2024-02-05',
-    pointsReward: 40,
-    isRegistered: true,
-    hasSubmittedProof: true
-  }
-];
+interface EventParticipant {
+  id: number;
+  eventId: number;
+  userId: number;
+  joinedAt: string;
+  status: 'registered' | 'participated' | 'approved' | 'declined';
+  proofSubmitted?: {
+    type: 'image' | 'video';
+    url: string;
+    submittedAt: string;
+  };
+  pointsAwarded?: number;
+}
 
 export default function Events() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [user, setUser] = useState(authStore.getCurrentUser());
-  const [events, setEvents] = useState<Event[]>(sampleEvents);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [proofFile, setProofFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Fetch events
+  const { data: events = [], isLoading } = useQuery<Event[]>({
+    queryKey: ['/api/events'],
+  });
+
+  // Fetch user's event participations
+  const { data: userParticipations = [] } = useQuery<EventParticipant[]>({
+    queryKey: ['/api/users', user?.id, 'events'],
+    enabled: !!user?.id,
+  });
+
+  // Join event mutation
+  const joinEventMutation = useMutation({
+    mutationFn: (eventId: number) => apiRequest(`/api/events/${eventId}/join`, {
+      method: 'POST',
+      body: JSON.stringify({ userId: user?.id }),
+    }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/users', user?.id, 'events'] });
+      toast({
+        title: "Success!",
+        description: "You have successfully joined the event!",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
 
   useEffect(() => {
     const currentUser = authStore.getCurrentUser();
@@ -78,15 +98,8 @@ export default function Events() {
     setUser(currentUser);
   }, [setLocation]);
 
-  const handleRegister = (eventId: string) => {
-    setEvents(events.map(event => 
-      event.id === eventId ? { ...event, isRegistered: true } : event
-    ));
-    
-    toast({
-      title: "Registration Successful",
-      description: "You have successfully registered for this event!",
-    });
+  const handleRegister = (eventId: number) => {
+    joinEventMutation.mutate(eventId);
   };
 
   const handleProofUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -123,15 +136,8 @@ export default function Events() {
     setIsSubmitting(true);
     
     try {
-      // Simulate API call
+      // For now, simulate API call - in real implementation, this would upload the file
       await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // Update event with proof submission
-      setEvents(events.map(event => 
-        event.id === selectedEvent.id 
-          ? { ...event, hasSubmittedProof: true, proofFile } 
-          : event
-      ));
       
       toast({
         title: "Proof Submitted",
@@ -156,21 +162,53 @@ export default function Events() {
       weekday: 'long',
       year: 'numeric',
       month: 'long',
-      day: 'numeric'
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
     });
   };
 
   const getEventStatus = (event: Event) => {
-    if (event.hasSubmittedProof) {
-      return <Badge className="bg-success text-white">Proof Submitted</Badge>;
-    } else if (event.isRegistered) {
-      return <Badge variant="secondary">Registered</Badge>;
-    } else {
-      return <Badge variant="outline">Not Registered</Badge>;
+    const participation = userParticipations.find(p => p.eventId === event.id);
+    
+    if (participation) {
+      if (participation.proofSubmitted) {
+        return <Badge className="bg-green-500 text-white">Proof Submitted</Badge>;
+      } else if (participation.status === 'registered') {
+        return <Badge variant="secondary">Registered</Badge>;
+      } else if (participation.status === 'approved') {
+        return <Badge className="bg-blue-500 text-white">Approved</Badge>;
+      }
     }
+    
+    return <Badge variant="outline">Not Registered</Badge>;
+  };
+
+  const isUserRegistered = (eventId: number) => {
+    return userParticipations.some(p => p.eventId === eventId);
+  };
+
+  const hasSubmittedProof = (eventId: number) => {
+    const participation = userParticipations.find(p => p.eventId === eventId);
+    return participation?.proofSubmitted != null;
   };
 
   if (!user) return null;
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background pb-20">
+        <Header title="Community Events" />
+        <div className="p-4 flex items-center justify-center h-64">
+          <div className="text-center">
+            <Clock className="h-16 w-16 mx-auto text-muted-foreground mb-4 animate-spin" />
+            <p className="text-muted-foreground">Loading events...</p>
+          </div>
+        </div>
+        <BottomNavigation />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -187,13 +225,24 @@ export default function Events() {
                     <CardTitle className="text-lg">{event.title}</CardTitle>
                     <div className="flex items-center text-sm text-muted-foreground mt-1">
                       <Calendar className="h-4 w-4 mr-1" />
-                      {formatDate(event.date)}
+                      {formatDate(event.startDate)}
                     </div>
                   </div>
                   {getEventStatus(event)}
                 </div>
               </CardHeader>
               <CardContent>
+                {/* Event Image */}
+                {event.imageUrl && (
+                  <div className="aspect-video bg-muted rounded-lg mb-4 overflow-hidden">
+                    <img 
+                      src={event.imageUrl} 
+                      alt={event.title}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                )}
+                
                 <p className="text-sm text-muted-foreground mb-3">{event.description}</p>
                 
                 <div className="flex items-center justify-between text-sm mb-4">
@@ -208,17 +257,18 @@ export default function Events() {
                 </div>
                 
                 <div className="flex gap-2">
-                  {!event.isRegistered && (
+                  {!isUserRegistered(event.id) && (
                     <Button 
                       onClick={() => handleRegister(event.id)}
                       className="flex-1"
+                      disabled={joinEventMutation.isPending}
                     >
                       <Users className="h-4 w-4 mr-2" />
-                      Register
+                      {joinEventMutation.isPending ? 'Registering...' : 'Register'}
                     </Button>
                   )}
                   
-                  {event.isRegistered && !event.hasSubmittedProof && (
+                  {isUserRegistered(event.id) && !hasSubmittedProof(event.id) && (
                     <Dialog>
                       <DialogTrigger asChild>
                         <Button 

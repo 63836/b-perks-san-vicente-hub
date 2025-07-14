@@ -1,24 +1,59 @@
 import { useState } from 'react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Header, BottomNavigation } from '@/components/ui/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { authStore } from '@/store/authStore';
+import { useToast } from '@/hooks/use-toast';
+import { apiRequest } from '@/lib/queryClient';
 import { MapPin, Camera, Send, X } from 'lucide-react';
 
 export default function Report() {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const user = authStore.getCurrentUser();
+  
   const [reportData, setReportData] = useState({
     title: '',
     description: '',
-    location: {
-      lat: 16.4023,
-      lng: 120.5960,
-      address: 'San Vicente, Baguio City' // Mock current location
-    }
+    location: 'San Vicente, Baguio City', // Default location
+    lat: 16.4023,
+    lng: 120.5960,
   });
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [showLocationPreview, setShowLocationPreview] = useState(true);
+
+  const submitReportMutation = useMutation({
+    mutationFn: (report: any) => apiRequest('/api/reports', {
+      method: 'POST',
+      body: JSON.stringify(report),
+    }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/reports'] });
+      toast({
+        title: "Report Submitted",
+        description: "Your report has been submitted successfully! The Barangay will review your concern.",
+      });
+      
+      // Reset form
+      setReportData({
+        title: '',
+        description: '',
+        location: 'San Vicente, Baguio City',
+        lat: 16.4023,
+        lng: 120.5960,
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -29,55 +64,44 @@ export default function Report() {
     e.preventDefault();
     
     if (!reportData.title.trim() || !reportData.description.trim()) {
-      alert('Please fill in all required fields');
+      toast({
+        title: "Missing Information",
+        description: "Please fill in all required fields",
+        variant: "destructive",
+      });
       return;
     }
 
-    setIsSubmitting(true);
-
-    try {
-      // TODO: Save report to local storage
-      const newReport = {
-        id: `report-${Date.now()}`,
-        userId: 'current-user-id', // TODO: Get from auth store
-        title: reportData.title.trim(),
-        description: reportData.description.trim(),
-        location: reportData.location,
-        status: 'pending',
-        submittedAt: new Date().toISOString()
-      };
-
-      // Mock submission
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      alert('Report submitted successfully! The Barangay will review your concern.');
-      
-      // Reset form
-      setReportData({
-        title: '',
-        description: '',
-        location: {
-          lat: 16.4023,
-          lng: 120.5960,
-          address: 'San Vicente, Baguio City'
-        }
+    if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please log in to submit a report",
+        variant: "destructive",
       });
-    } catch (error) {
-      alert('Failed to submit report. Please try again.');
-    } finally {
-      setIsSubmitting(false);
+      return;
     }
+
+    const reportToSubmit = {
+      userId: user.id,
+      title: reportData.title.trim(),
+      description: reportData.description.trim(),
+      location: reportData.location,
+      lat: reportData.lat,
+      lng: reportData.lng,
+      imageUrl: "/placeholder.svg", // Default placeholder for now
+      status: 'pending',
+    };
+
+    submitReportMutation.mutate(reportToSubmit);
   };
 
   const handleCancel = () => {
     setReportData({
       title: '',
       description: '',
-      location: {
-        lat: 16.4023,
-        lng: 120.5960,
-        address: 'San Vicente, Baguio City'
-      }
+      location: 'San Vicente, Baguio City',
+      lat: 16.4023,
+      lng: 120.5960,
     });
   };
 
@@ -112,10 +136,10 @@ export default function Report() {
                 </div>
               </div>
               <p className="text-sm text-muted-foreground">
-                {reportData.location.address}
+                {reportData.location}
               </p>
               <p className="text-xs text-muted-foreground mt-1">
-                Lat: {reportData.location.lat}, Lng: {reportData.location.lng}
+                Lat: {reportData.lat}, Lng: {reportData.lng}
               </p>
             </CardContent>
           </Card>
@@ -178,7 +202,7 @@ export default function Report() {
                   variant="outline"
                   onClick={handleCancel}
                   className="flex-1"
-                  disabled={isSubmitting}
+                  disabled={submitReportMutation.isPending}
                 >
                   <X className="h-4 w-4 mr-2" />
                   Cancel
@@ -186,10 +210,10 @@ export default function Report() {
                 <Button
                   type="submit"
                   className="flex-1"
-                  disabled={isSubmitting}
+                  disabled={submitReportMutation.isPending}
                 >
                   <Send className="h-4 w-4 mr-2" />
-                  {isSubmitting ? 'Submitting...' : 'Submit Report'}
+                  {submitReportMutation.isPending ? 'Submitting...' : 'Submit Report'}
                 </Button>
               </div>
             </form>

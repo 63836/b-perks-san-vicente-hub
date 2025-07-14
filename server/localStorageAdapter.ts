@@ -70,24 +70,38 @@ export class LocalStorageAdapter implements IStorage {
     };
     this.users.set(user.id, user);
 
-    // Create sample rewards
+    // Create sample user 2
+    const user2: User = {
+      id: this.currentId++,
+      username: "maria",
+      password: "maria123",
+      name: "Maria Santos",
+      age: 28,
+      phoneNumber: "09876543210",
+      points: 75,
+      isAdmin: false,
+      createdAt: new Date(),
+    };
+    this.users.set(user2.id, user2);
+
+    // Create sample rewards with images
     const rewards = [
       {
         id: this.currentId++,
         title: "Eco-Friendly Water Bottle",
-        description: "Reusable water bottle made from recycled materials",
+        description: "BPA-free stainless steel water bottle with Barangay San Vicente logo",
         pointsCost: 100,
-        imageUrl: null,
+        imageUrl: "/placeholder.svg",
         isAvailable: true,
         category: "Environment",
         createdAt: new Date(),
       },
       {
         id: this.currentId++,
-        title: "Community Garden Starter Kit",
-        description: "Seeds and tools to start your own garden",
-        pointsCost: 150,
-        imageUrl: null,
+        title: "Community Garden Seeds Pack",
+        description: "Vegetable seeds for home gardening - tomato, lettuce, herbs",
+        pointsCost: 75,
+        imageUrl: "/placeholder.svg",
         isAvailable: true,
         category: "Gardening",
         createdAt: new Date(),
@@ -95,17 +109,169 @@ export class LocalStorageAdapter implements IStorage {
       {
         id: this.currentId++,
         title: "Barangay T-Shirt",
-        description: "Official Barangay San Vicente t-shirt",
-        pointsCost: 75,
-        imageUrl: null,
+        description: "Official Barangay San Vicente t-shirt, available in all sizes",
+        pointsCost: 150,
+        imageUrl: "/placeholder.svg",
         isAvailable: true,
-        category: "Merchandise",
+        category: "Apparel",
+        createdAt: new Date(),
+      },
+      {
+        id: this.currentId++,
+        title: "Emergency Flashlight",
+        description: "LED flashlight with hand crank for emergencies",
+        pointsCost: 200,
+        imageUrl: "/placeholder.svg",
+        isAvailable: true,
+        category: "Safety",
+        createdAt: new Date(),
+      },
+      {
+        id: this.currentId++,
+        title: "Reusable Shopping Bag",
+        description: "Durable canvas shopping bag to reduce plastic use",
+        pointsCost: 50,
+        imageUrl: "/placeholder.svg",
+        isAvailable: true,
+        category: "Environment",
         createdAt: new Date(),
       }
     ];
 
     rewards.forEach(reward => {
       this.rewards.set(reward.id, reward as Reward);
+    });
+
+    // Create sample events with images
+    const events = [
+      {
+        id: this.currentId++,
+        title: "Community Clean-Up Drive",
+        description: "Join us for a neighborhood cleanup to keep our barangay beautiful and earn points!",
+        location: "Barangay San Vicente Plaza",
+        lat: 16.4023,
+        lng: 120.5960,
+        pointsReward: 50,
+        startDate: new Date('2025-07-20T08:00:00'),
+        endDate: new Date('2025-07-20T12:00:00'),
+        isActive: true,
+        imageUrl: "/placeholder.svg",
+        maxParticipants: 50,
+        createdAt: new Date(),
+      },
+      {
+        id: this.currentId++,
+        title: "Disaster Preparedness Seminar",
+        description: "Learn essential emergency preparedness skills and earn points for attending",
+        location: "Barangay Hall Conference Room",
+        lat: 16.4020,
+        lng: 120.5955,
+        pointsReward: 75,
+        startDate: new Date('2025-07-25T14:00:00'),
+        endDate: new Date('2025-07-25T17:00:00'),
+        isActive: true,
+        imageUrl: "/placeholder.svg",
+        maxParticipants: 30,
+        createdAt: new Date(),
+      },
+      {
+        id: this.currentId++,
+        title: "Tree Planting Activity",
+        description: "Help restore our environment by planting trees in the community park",
+        location: "San Vicente Community Park",
+        lat: 16.4025,
+        lng: 120.5965,
+        pointsReward: 100,
+        startDate: new Date('2025-07-30T07:00:00'),
+        endDate: new Date('2025-07-30T11:00:00'),
+        isActive: true,
+        imageUrl: "/placeholder.svg",
+        maxParticipants: 40,
+        createdAt: new Date(),
+      }
+    ];
+
+    events.forEach(event => {
+      this.events.set(event.id, event as Event);
+    });
+
+    // Create sample reports
+    const reports = [
+      {
+        id: this.currentId++,
+        userId: user.id,
+        title: "Broken Street Light",
+        description: "The street light on Main Street has been broken for 3 days. It's dangerous at night.",
+        location: "Main Street near Sari-sari store",
+        lat: 16.4018,
+        lng: 120.5950,
+        imageUrl: "/placeholder.svg",
+        status: 'pending',
+        createdAt: new Date(),
+      },
+      {
+        id: this.currentId++,
+        userId: user2.id,
+        title: "Clogged Drainage",
+        description: "The drainage system is clogged and causing flooding during heavy rains.",
+        location: "Purok 2 near basketball court",
+        lat: 16.4030,
+        lng: 120.5970,
+        imageUrl: "/placeholder.svg",
+        status: 'pending',
+        createdAt: new Date(),
+      },
+      {
+        id: this.currentId++,
+        userId: user.id,
+        title: "Stray Dogs Issue",
+        description: "There are several stray dogs in the area that might pose a health risk.",
+        location: "Near elementary school",
+        lat: 16.4015,
+        lng: 120.5945,
+        imageUrl: "/placeholder.svg",
+        status: 'pending',
+        createdAt: new Date(),
+      }
+    ];
+
+    reports.forEach(report => {
+      this.reports.set(report.id, report as Report);
+    });
+
+    // Create sample news alerts with images
+    const newsAlerts = [
+      {
+        id: this.currentId++,
+        title: "Barangay Assembly Meeting",
+        content: "Monthly barangay assembly meeting scheduled for July 28, 2025 at 7:00 PM. All residents are encouraged to attend.",
+        type: 'announcement',
+        imageUrl: "/placeholder.svg",
+        authorId: admin.id,
+        createdAt: new Date(),
+      },
+      {
+        id: this.currentId++,
+        title: "Water Interruption Notice",
+        content: "Water service will be temporarily interrupted on July 22, 2025 from 8:00 AM to 4:00 PM for maintenance.",
+        type: 'alert',
+        imageUrl: "/placeholder.svg",
+        authorId: admin.id,
+        createdAt: new Date(),
+      },
+      {
+        id: this.currentId++,
+        title: "New Health Center Services",
+        content: "The barangay health center now offers free blood pressure monitoring every Tuesday and Thursday from 8:00 AM to 12:00 PM.",
+        type: 'news',
+        imageUrl: "/placeholder.svg",
+        authorId: admin.id,
+        createdAt: new Date(),
+      }
+    ];
+
+    newsAlerts.forEach(alert => {
+      this.newsAlerts.set(alert.id, alert as NewsAlert);
     });
   }
 
