@@ -7,11 +7,12 @@ B-Perks is a comprehensive community engagement platform designed for Barangay S
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
+Authentication: Frontend-only mode, no backend database connections.
 
 ## Recent Changes (July 14, 2025)
 
 - **Project Migration Completed**: Successfully migrated from Replit Agent to standard Replit environment
-- **File-Based Database Implemented**: Created comprehensive local file storage system as primary database
+- **Frontend-Only Mode**: System now operates entirely in frontend with local storage authentication
 - **Real-Time Data Persistence**: All operations now automatically save to local text files:
   - User registrations, login credentials, and point updates
   - Community events creation and management

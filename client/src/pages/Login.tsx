@@ -30,24 +30,7 @@ export default function Login() {
     setIsLoading(true);
 
     try {
-      // Make API call to backend for authentication
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ username, password }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Login failed');
-      }
-
-      const { user } = await response.json();
-      
-      // Save user to auth store for session management
-      authStore.setCurrentUser(user);
+      const user = authStore.login(username, password);
       
       toast({
         title: "Welcome back!",
@@ -147,8 +130,7 @@ export default function Login() {
             <p className="text-xs text-muted-foreground mb-2 font-medium">Demo Credentials:</p>
             <div className="space-y-1 text-xs">
               <div><strong>Admin:</strong> admin / admin123</div>
-              <div><strong>User:</strong> user1 / user123</div>
-              <div><strong>User:</strong> maria / maria123</div>
+              <div><strong>User:</strong> Create new account or use admin</div>
             </div>
           </div>
         </CardContent>
