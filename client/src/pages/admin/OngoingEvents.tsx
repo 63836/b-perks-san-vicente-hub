@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useLocation } from 'wouter';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -36,11 +37,103 @@ interface OngoingEvent {
 export default function OngoingEvents() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
-  const [selectedEvent, setSelectedEvent] = useState<OngoingEvent | null>(null);
-  const [selectedParticipant, setSelectedParticipant] = useState<EventParticipant | null>(null);
+  const queryClient = useQueryClient();
+  const [selectedEvent, setSelectedEvent] = useState<any | null>(null);
+  const [selectedParticipant, setSelectedParticipant] = useState<any | null>(null);
 
-  // Mock data for ongoing events
-  const ongoingEvents: OngoingEvent[] = [
+  // Fetch events from API
+  const { data: events = [], isLoading } = useQuery({
+    queryKey: ['/api/events'],
+    queryFn: async () => {
+      const response = await fetch('/api/events');
+      if (!response.ok) throw new Error('Failed to fetch events');
+      return response.json();
+    }
+  });
+
+  // Fetch participants for selected event
+  const { data: participants = [] } = useQuery({
+    queryKey: ['/api/events', selectedEvent?.id, 'participants'],
+    queryFn: async () => {
+      if (!selectedEvent?.id) return [];
+      const response = await fetch(`/api/events/${selectedEvent.id}/participants`);
+      if (!response.ok) throw new Error('Failed to fetch participants');
+      const data = await response.json();
+      
+      // Enhance participants with user names
+      const enhancedParticipants = await Promise.all(
+        data.map(async (participant: any) => {
+          const userResponse = await fetch(`/api/users/${participant.userId}`);
+          const user = userResponse.ok ? await userResponse.json() : null;
+          return {
+            ...participant,
+            name: user?.name || 'Unknown User'
+          };
+        })
+      );
+      
+      return enhancedParticipants;
+    },
+    enabled: !!selectedEvent?.id
+  });
+
+  // Grant points mutation
+  const grantPointsMutation = useMutation({
+    mutationFn: async ({ participantId, eventId, points }: { participantId: number, eventId: number, points: number }) => {
+      const response = await fetch(`/api/event-participants/${participantId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          status: 'approved',
+          pointsAwarded: points,
+          reviewedAt: new Date().toISOString(),
+          reviewedBy: 1 // Admin user ID
+        })
+      });
+      if (!response.ok) throw new Error('Failed to grant points');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/events'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/events', selectedEvent?.id, 'participants'] });
+      // Invalidate user transactions to update Recent Activity
+      queryClient.invalidateQueries({ queryKey: ['/api/users'] });
+      toast({
+        title: "Points Granted",
+        description: "Points have been successfully granted to the participant.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to grant points. Please try again.",
+        variant: "destructive"
+      });
+    }
+  });
+
+  // End event mutation
+  const endEventMutation = useMutation({
+    mutationFn: async (eventId: number) => {
+      const response = await fetch(`/api/events/${eventId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isActive: false })
+      });
+      if (!response.ok) throw new Error('Failed to end event');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/events'] });
+      toast({
+        title: "Event Ended",
+        description: "Event has been ended successfully.",
+      });
+    }
+  });
+
+  // Mock data for ongoing events (fallback)
+  const mockEvents: OngoingEvent[] = [
     {
       id: '1',
       title: 'Community Clean-up Drive',
@@ -95,30 +188,36 @@ export default function OngoingEvents() {
     }
   ];
 
-  const handleEndEvent = (eventId: string) => {
-    // TODO: End event in backend
-    toast({
-      title: "Event Ended",
-      description: "Event has been ended successfully.",
-    });
+  const handleEndEvent = (eventId: number) => {
+    endEventMutation.mutate(eventId);
   };
 
-  const handleGrantPoints = (participantId: string, eventId: string) => {
-    const event = ongoingEvents.find(e => e.id === eventId);
-    if (!event) return;
-
-    // TODO: Grant points to user in backend
-    toast({
-      title: "Points Granted",
-      description: `${event.pointsReward} points granted to participant.`,
-    });
+  const handleGrantPoints = (participantId: number, eventId: number, points: number) => {
+    grantPointsMutation.mutate({ participantId, eventId, points });
   };
 
-  const handleDeclineParticipant = (participantId: string) => {
-    // TODO: Decline participant in backend
-    toast({
-      title: "Participant Declined",
-      description: "Participant has been declined.",
+  const handleDeclineParticipant = (participantId: number) => {
+    // Decline participant mutation
+    fetch(`/api/event-participants/${participantId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        status: 'declined',
+        reviewedAt: new Date().toISOString(),
+        reviewedBy: 1 // Admin user ID
+      })
+    }).then(() => {
+      queryClient.invalidateQueries({ queryKey: ['/api/events', selectedEvent?.id, 'participants'] });
+      toast({
+        title: "Participant Declined",
+        description: "Participant has been declined.",
+      });
+    }).catch(() => {
+      toast({
+        title: "Error",
+        description: "Failed to decline participant.",
+        variant: "destructive"
+      });
     });
   };
 
@@ -179,11 +278,12 @@ export default function OngoingEvents() {
                 </div>
               )}
 
-              {selectedParticipant.status === 'participated' && (
+              {(selectedParticipant.status === 'participated' || selectedParticipant.status === 'registered') && !selectedParticipant.pointsAwarded && (
                 <div className="flex space-x-2">
                   <Button 
-                    onClick={() => handleGrantPoints(selectedParticipant.id, selectedEvent.id)}
+                    onClick={() => handleGrantPoints(selectedParticipant.id, selectedEvent.id, selectedEvent.pointsReward)}
                     className="flex-1"
+                    disabled={grantPointsMutation.isPending}
                   >
                     <CheckCircle className="h-4 w-4 mr-2" />
                     Grant {selectedEvent.pointsReward} Points
@@ -196,6 +296,13 @@ export default function OngoingEvents() {
                     <XCircle className="h-4 w-4 mr-2" />
                     Decline
                   </Button>
+                </div>
+              )}
+              {selectedParticipant.pointsAwarded && (
+                <div className="p-3 bg-green-50 rounded-lg">
+                  <p className="text-sm text-green-700">
+                    ✓ Points already granted: {selectedParticipant.pointsAwarded} points
+                  </p>
                 </div>
               )}
             </CardContent>
@@ -238,13 +345,13 @@ export default function OngoingEvents() {
                   </div>
                   <div className="flex items-center">
                     <Users className="h-4 w-4 mr-1" />
-                    {selectedEvent.participants.length} participants
+                    {participants.length} participants
                   </div>
                 </div>
 
                 <div className="space-y-2">
                   <h4 className="font-medium">Participants</h4>
-                  {selectedEvent.participants.map((participant) => (
+                  {participants.map((participant) => (
                     <div key={participant.id} className="flex items-center justify-between p-3 bg-muted rounded-lg">
                       <div>
                         <p className="font-medium">{participant.name}</p>
@@ -297,8 +404,13 @@ export default function OngoingEvents() {
           Back to Dashboard
         </Button>
 
-        <div className="space-y-4">
-          {ongoingEvents.map((event) => (
+        {isLoading ? (
+          <p className="text-center py-8">Loading events...</p>
+        ) : events.length === 0 ? (
+          <p className="text-center py-8 text-muted-foreground">No events found.</p>
+        ) : (
+          <div className="space-y-4">
+            {events.filter(event => event.isActive).map((event) => (
             <Card key={event.id}>
               <CardHeader>
                 <CardTitle className="flex items-center justify-between">
@@ -320,7 +432,7 @@ export default function OngoingEvents() {
                     </div>
                     <div className="flex items-center">
                       <Users className="h-4 w-4 mr-1" />
-                      {event.participants.length} participants
+                      0 participants
                     </div>
                   </div>
                   
@@ -351,7 +463,8 @@ export default function OngoingEvents() {
               </CardContent>
             </Card>
           ))}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -93,6 +93,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/users/:id", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.id);
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      res.json({ ...user, password: undefined });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch user" });
+    }
+  });
+
   app.post("/api/users/:id/points", async (req, res) => {
     try {
       const userId = parseInt(req.params.id);
@@ -321,15 +334,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // If approving participation, award points
       if (updates.status === "approved" && updates.pointsAwarded) {
         const user = await storage.getUser(participant.userId);
+        const event = await storage.getEvent(participant.eventId);
         if (user) {
           await storage.updateUserPoints(participant.userId, user.points + updates.pointsAwarded);
           
-          // Create transaction
+          // Create transaction with event name
           await storage.createTransaction({
             userId: participant.userId,
             type: "earned",
             amount: updates.pointsAwarded,
-            description: `Event participation approved`,
+            description: `Points granted for participating in "${event?.title || 'Event'}"`,
             eventId: participant.eventId,
             rewardId: null,
             claimId: null,

@@ -20,12 +20,13 @@ Authentication: Frontend-only mode, no backend database connections.
   - Rewards catalog and claim processing
   - Community reports submission and tracking
   - News and alerts publishing
-- **System Testing Verified**: All major functions working with file persistence:
-  - User registration (tested with 2 new users)
-  - Reward creation and redemption (points deducted correctly)
-  - Report submissions (saved to files)
-  - Event participation (users can join events)
-  - News alert creation (published successfully)
+- **Admin Point Granting System**: Implemented complete point granting workflow:
+  - Admin can view event participants with real-time API data
+  - One-time point granting per event with status tracking
+  - Points granted show immediately in user's Recent Activity dashboard
+  - Automatic transaction creation with event details
+  - Event status updates (active/ended) controlled by admin
+- **Enhanced Event Management**: Real event participant tracking with user name resolution
 - **Smart Location Autocomplete**: Added intelligent location search for San Vicente addresses
 - **Database Location**: All data stored in `data/local_database/` with automatic updates
 - **Persistence Fixed**: Users now persist across server restarts (loads from files on startup)
