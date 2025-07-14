@@ -59,10 +59,15 @@ export default function Rewards() {
       body: JSON.stringify({ userId: user?.id }),
     }),
     onSuccess: async (claimData) => {
-      // Invalidate multiple queries to refresh UI
-      queryClient.invalidateQueries({ queryKey: ['/api/users', user?.id, 'transactions'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/rewards'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/users', user?.id] });
+      // Immediately invalidate and refetch all related queries
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['/api/users', user?.id, 'transactions'] }),
+        queryClient.invalidateQueries({ queryKey: ['/api/rewards'] }),
+        queryClient.invalidateQueries({ queryKey: ['/api/users', user?.id] })
+      ]);
+      
+      // Force refetch transactions to update history immediately
+      await queryClient.refetchQueries({ queryKey: ['/api/users', user?.id, 'transactions'] });
       
       // Force refresh user data from server
       try {

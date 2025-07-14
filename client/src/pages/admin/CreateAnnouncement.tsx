@@ -346,10 +346,11 @@ export default function CreateAnnouncement() {
             <div className="space-y-4">
               <div className="h-[400px] w-full relative">
                 <MapContainer
-                  center={[16.4074, 120.5960]}
+                  center={formData.coordinates ? [formData.coordinates.lat, formData.coordinates.lng] : [16.4074, 120.5960]}
                   zoom={15}
                   style={{ height: '100%', width: '100%' }}
                   className="rounded-lg cursor-crosshair"
+                  key={formData.coordinates ? `${formData.coordinates.lat}-${formData.coordinates.lng}` : 'default'}
                 >
                   <TileLayer
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
