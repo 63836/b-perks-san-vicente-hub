@@ -321,7 +321,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const participant = await storage.joinEvent(eventId, userId);
       res.json(participant);
     } catch (error) {
-      res.status(500).json({ error: "Failed to join event" });
+      const message = error instanceof Error ? error.message : "Failed to join event";
+      const status = message.includes('already registered') ? 400 : 500;
+      res.status(status).json({ error: message });
     }
   });
 

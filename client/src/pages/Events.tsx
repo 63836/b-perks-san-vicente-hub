@@ -59,7 +59,7 @@ export default function Events() {
 
   // Fetch user's event participations
   const { data: userParticipations = [], refetch: refetchParticipations } = useQuery<EventParticipant[]>({
-    queryKey: ['/api/users', user?.id, 'events'],
+    queryKey: [`/api/users/${user?.id}/events`],
     enabled: !!user?.id,
     staleTime: 0, // Always fetch fresh data
     cacheTime: 0, // Don't cache this query
@@ -73,7 +73,7 @@ export default function Events() {
     }),
     onSuccess: () => {
       // Invalidate both queries to refresh data
-      queryClient.invalidateQueries({ queryKey: ['/api/users', user?.id, 'events'] });
+      queryClient.invalidateQueries({ queryKey: [`/api/users/${user?.id}/events`] });
       queryClient.invalidateQueries({ queryKey: ['/api/events'] });
       // Also refetch immediately to update UI
       refetchParticipations();

@@ -864,6 +864,14 @@ export class FileStorageAdapter implements IStorage {
 
   // Event participant methods
   async joinEvent(eventId: number, userId: number): Promise<EventParticipant> {
+    // Check if user is already registered for this event
+    const existingParticipation = Array.from(this.eventParticipants.values())
+      .find(p => p.eventId === eventId && p.userId === userId);
+    
+    if (existingParticipation) {
+      throw new Error('User is already registered for this event');
+    }
+    
     const participant: EventParticipant = {
       id: this.currentId++,
       eventId,
