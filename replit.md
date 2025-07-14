@@ -31,6 +31,11 @@ Authentication: Frontend-only mode, no backend database connections.
 - **Database Location**: All data stored in `data/local_database/` with automatic updates
 - **Persistence Fixed**: Users now persist across server restarts (loads from files on startup)
 - **Migration Benefits**: No external database dependency, enhanced security, improved performance
+- **Event Registration Fixes**: Fixed event registration UI updates, GIS map real-time data integration, and participant tracking
+  - Event registration now immediately shows "Registered" status
+  - GIS map displays actual events from database instead of sample data
+  - Admin can see real-time event participants with proper user name resolution
+  - Improved query caching to ensure fresh data after registration
 
 ## System Architecture
 
