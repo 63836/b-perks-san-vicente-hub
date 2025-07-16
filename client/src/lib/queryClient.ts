@@ -31,6 +31,11 @@ export const defaultFetcher = async (url: string): Promise<any> => {
 
 // Offline-only API request helper - no network calls
 export const apiRequest = async (url: string, options?: RequestInit): Promise<any> => {
+  // Use frontend API request instead of network calls
+  return await frontendApiRequest(url, options);
+};
+
+export const apiRequestOld = async (url: string, options?: RequestInit): Promise<any> => {
   // For write operations, save to local storage immediately
   if (options?.method && options.method !== 'GET') {
     const data = options.body ? JSON.parse(options.body as string) : undefined;

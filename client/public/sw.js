@@ -1,4 +1,4 @@
-const CACHE_NAME = 'b-perks-offline-v1';
+const CACHE_NAME = 'b-perks-pwa-v1';
 const urlsToCache = [
   '/',
   '/src/main.tsx',

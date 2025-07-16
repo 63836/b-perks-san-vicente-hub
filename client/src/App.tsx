@@ -3,7 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Router, Route, Switch } from "wouter";
-import { queryClient } from "./lib/queryClient";
+import { frontendQueryClient } from "./lib/frontendQueryClient";
 import { OfflineModeIndicator } from "./components/OfflineModeIndicator";
 import { PWAInstallPrompt } from "./components/PWAInstallPrompt";
 import Index from "./pages/Index";
@@ -26,7 +26,7 @@ import OfflineSettings from "./pages/OfflineSettings";
 import NotFound from "./pages/NotFound";
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
+  <QueryClientProvider client={frontendQueryClient}>
     <TooltipProvider>
       <Toaster />
       <Sonner />
