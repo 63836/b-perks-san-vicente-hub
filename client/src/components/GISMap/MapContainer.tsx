@@ -280,42 +280,7 @@ const sampleMapData: MapData = {
   ]
 };
 
-interface OfflineControlProps {
-  onDownloadTiles: () => void;
-  isDownloading: boolean;
-  isOffline: boolean;
-}
 
-
-
-const OfflineControl: React.FC<OfflineControlProps> = ({ onDownloadTiles, isDownloading, isOffline }) => {
-  return (
-    <div className="absolute top-4 right-4 z-[1000] space-y-2">
-      <Card className="p-2">
-        <div className="flex items-center space-x-2">
-          {isOffline ? (
-            <WifiOff className="h-4 w-4 text-destructive" />
-          ) : (
-            <Wifi className="h-4 w-4 text-success" />
-          )}
-          <span className="text-xs">
-            {isOffline ? 'Offline' : 'Online'}
-          </span>
-        </div>
-      </Card>
-      
-      <Button
-        size="sm"
-        onClick={onDownloadTiles}
-        disabled={isDownloading}
-        className="w-full"
-      >
-        <Download className="h-4 w-4 mr-1" />
-        {isDownloading ? 'Downloading...' : 'Cache Tiles'}
-      </Button>
-    </div>
-  );
-};
 
 const LocationMarker: React.FC = () => {
   const [position, setPosition] = useState<[number, number] | null>(null);
@@ -420,8 +385,7 @@ const GISMap: React.FC<GISMapProps> = ({
   initialZoom = 15,
   showMarkerAtCenter = false
 }) => {
-  const [isDownloading, setIsDownloading] = useState(false);
-  const [isOffline, setIsOffline] = useState(!navigator.onLine);
+
   const [mapData, setMapData] = useState<MapData>(sampleMapData);
   const [realReports, setRealReports] = useState<any[]>([]);
   const [selectedLocation, setSelectedLocation] = useState<[number, number] | null>(null);
@@ -447,11 +411,6 @@ const GISMap: React.FC<GISMapProps> = ({
   // Calculate overlapping reports for red circle visualization
 
   useEffect(() => {
-    const handleOnline = () => setIsOffline(false);
-    const handleOffline = () => setIsOffline(true);
-
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
 
     // Fetch real data from the database
     const fetchData = async () => {
@@ -506,24 +465,11 @@ const GISMap: React.FC<GISMapProps> = ({
     const intervalId = setInterval(fetchData, 30000);
 
     return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
       clearInterval(intervalId);
     };
   }, []);
 
-  const handleDownloadTiles = async () => {
-    setIsDownloading(true);
-    try {
-      // Simulate tile downloading process
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      alert('Map tiles cached for offline use!');
-    } catch (error) {
-      alert('Failed to cache tiles. Please try again.');
-    } finally {
-      setIsDownloading(false);
-    }
-  };
+
 
 
 
@@ -726,11 +672,7 @@ const GISMap: React.FC<GISMapProps> = ({
 
 
 
-        <OfflineControl
-          onDownloadTiles={handleDownloadTiles}
-          isDownloading={isDownloading}
-          isOffline={isOffline}
-        />
+
       </MapContainer>
     </div>
   );

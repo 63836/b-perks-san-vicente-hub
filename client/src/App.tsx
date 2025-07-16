@@ -21,7 +21,7 @@ import CreateAnnouncement from "./pages/admin/CreateAnnouncement";
 import ManageRewards from "./pages/admin/ManageRewards";
 import OngoingEvents from "./pages/admin/OngoingEvents";
 import ReviewReports from "./pages/admin/ReviewReports";
-import OfflineSettings from "./pages/OfflineSettings";
+
 
 import NotFound from "./pages/NotFound";
 
@@ -50,7 +50,7 @@ const App = () => (
           <Route path="/admin/manage-rewards" component={ManageRewards} />
           <Route path="/admin/ongoing-events" component={OngoingEvents} />
           <Route path="/admin/reports" component={ReviewReports} />
-          <Route path="/offline-settings" component={OfflineSettings} />
+
 
           <Route component={NotFound} />
         </Switch>
