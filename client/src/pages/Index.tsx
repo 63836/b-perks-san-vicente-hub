@@ -1,12 +1,12 @@
 import { useEffect } from 'react';
 import { useLocation } from 'wouter';
-import { authStore } from '@/store/authStore';
+import { frontendStorage } from '@/lib/frontendStorage';
 
 const Index = () => {
   const [, setLocation] = useLocation();
 
   useEffect(() => {
-    const user = authStore.getCurrentUser();
+    const user = frontendStorage.getCurrentUser();
     if (user) {
       if (user.isAdmin) {
         setLocation('/admin');

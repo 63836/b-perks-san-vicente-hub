@@ -4,7 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Router, Route, Switch } from "wouter";
 import { frontendQueryClient } from "./lib/frontendQueryClient";
-import { OfflineModeIndicator } from "./components/OfflineModeIndicator";
+
 import { PWAInstallPrompt } from "./components/PWAInstallPrompt";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
@@ -30,7 +30,7 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <OfflineModeIndicator />
+
       <PWAInstallPrompt />
       <Router>
         <Switch>

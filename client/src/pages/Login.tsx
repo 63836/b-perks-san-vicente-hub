@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { authStore } from '@/store/authStore';
+import { frontendStorage } from '@/lib/frontendStorage';
 import { Shield, MapPin } from 'lucide-react';
 
 export default function Login() {
@@ -30,7 +30,7 @@ export default function Login() {
     setIsLoading(true);
 
     try {
-      const user = await authStore.login(username, password);
+      const user = await frontendStorage.login(username, password);
       
       toast({
         title: "Welcome back!",
