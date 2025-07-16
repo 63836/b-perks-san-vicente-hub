@@ -4,6 +4,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Router, Route, Switch } from "wouter";
 import { queryClient } from "./lib/queryClient";
+import { OfflineIndicator } from "./components/OfflineIndicator";
+import { PWAInstallPrompt } from "./components/PWAInstallPrompt";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
@@ -19,6 +21,7 @@ import CreateAnnouncement from "./pages/admin/CreateAnnouncement";
 import ManageRewards from "./pages/admin/ManageRewards";
 import OngoingEvents from "./pages/admin/OngoingEvents";
 import ReviewReports from "./pages/admin/ReviewReports";
+import OfflineSettings from "./pages/OfflineSettings";
 
 import NotFound from "./pages/NotFound";
 
@@ -27,6 +30,8 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
+      <OfflineIndicator />
+      <PWAInstallPrompt />
       <Router>
         <Switch>
           <Route path="/" component={Index} />
@@ -45,6 +50,7 @@ const App = () => (
           <Route path="/admin/manage-rewards" component={ManageRewards} />
           <Route path="/admin/ongoing-events" component={OngoingEvents} />
           <Route path="/admin/reports" component={ReviewReports} />
+          <Route path="/offline-settings" component={OfflineSettings} />
 
           <Route component={NotFound} />
         </Switch>

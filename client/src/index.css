@@ -53,6 +53,15 @@ All colors MUST be HSL.
     --warning-foreground: 220 15% 15%;
 
     /* Info blue */
+    --info: 213 94% 45%;
+    --info-foreground: 0 0% 100%;
+
+    /* Offline indicator shadow */
+    --shadow-medium: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+
+    /* PWA install button */
+    --install-bg: 142 52% 35%;
+    --install-fg: 0 0% 100%;
     --info: 201 96% 32%;
     --info-foreground: 0 0% 100%;
 
