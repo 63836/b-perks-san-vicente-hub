@@ -41,14 +41,9 @@ export class OfflineStorageManager {
   }
 
   private setupNetworkListeners() {
-    window.addEventListener('online', () => {
-      this.isOnline = true;
-      this.syncOfflineActions();
-    });
-
-    window.addEventListener('offline', () => {
-      this.isOnline = false;
-    });
+    // Force offline mode - never sync to network
+    this.isOnline = false;
+    console.log('Offline-only mode enabled');
   }
 
   // Cache data for offline access
@@ -78,19 +73,9 @@ export class OfflineStorageManager {
     }
   }
 
-  // Queue action for offline sync
+  // Save action locally in offline mode
   async queueOfflineAction(action: Omit<OfflineAction, 'id' | 'timestamp'>): Promise<void> {
-    if (this.isOnline) {
-      // If online, execute immediately
-      try {
-        await this.executeAction(action);
-        return;
-      } catch (error) {
-        console.error('Online action failed, queueing for later:', error);
-      }
-    }
-
-    // Queue for offline sync
+    // Always save locally - never attempt network calls
     const offlineAction: OfflineAction = {
       ...action,
       id: `offline_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
@@ -102,9 +87,9 @@ export class OfflineStorageManager {
       existingQueue.push(offlineAction);
       await syncQueue.setItem('actions', existingQueue);
       
-      console.log('Action queued for offline sync:', offlineAction);
+      console.log('Action saved locally:', offlineAction);
     } catch (error) {
-      console.error('Failed to queue offline action:', error);
+      console.error('Failed to save action locally:', error);
     }
   }
 
@@ -119,49 +104,17 @@ export class OfflineStorageManager {
     }
   }
 
-  // Sync offline actions when back online
+  // Offline-only mode - no network sync
   async syncOfflineActions(): Promise<void> {
-    if (!this.isOnline) return;
-
-    try {
-      const queue = await this.getSyncQueue();
-      const successfulActions: string[] = [];
-
-      for (const action of queue) {
-        try {
-          await this.executeAction(action);
-          successfulActions.push(action.id);
-          console.log('Synced offline action:', action);
-        } catch (error) {
-          console.error('Failed to sync action:', action, error);
-        }
-      }
-
-      // Remove successful actions from queue
-      if (successfulActions.length > 0) {
-        const remainingQueue = queue.filter(action => !successfulActions.includes(action.id));
-        await syncQueue.setItem('actions', remainingQueue);
-      }
-
-    } catch (error) {
-      console.error('Failed to sync offline actions:', error);
-    }
+    console.log('Offline-only mode: All actions saved locally, no network sync');
+    // No network synchronization - pure offline mode
   }
 
-  // Execute an action
+  // Save action locally - no network execution
   private async executeAction(action: Omit<OfflineAction, 'id' | 'timestamp'>): Promise<void> {
-    const response = await fetch(action.endpoint, {
-      method: action.method,
-      headers: {
-        'Content-Type': 'application/json',
-        ...action.headers
-      },
-      body: action.data ? JSON.stringify(action.data) : undefined
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-    }
+    console.log('Saving action locally:', action);
+    // In offline mode, actions are just stored locally
+    // No network requests are made
   }
 
   // Cache management
