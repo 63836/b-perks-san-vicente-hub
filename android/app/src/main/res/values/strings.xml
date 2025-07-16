@@ -1,7 +1,0 @@
-<?xml version='1.0' encoding='utf-8'?>
-<resources>
-    <string name="app_name">b-perks-san-vicente-hub</string>
-    <string name="title_activity_main">b-perks-san-vicente-hub</string>
-    <string name="package_name">com.bperks.sanvicentehub</string>
-    <string name="custom_url_scheme">com.bperks.sanvicentehub</string>
-</resources>

@@ -47,7 +47,7 @@ Description: Durable canvas shopping bag to reduce plastic use
 Points Cost: 50
 Category: Environment
 Total Quantity: 25
-Available Quantity: 24
+Available Quantity: 25
 Status: Available
 Image: /placeholder.svg
 
