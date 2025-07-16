@@ -17,72 +17,41 @@ export const queryClient = new QueryClient({
   },
 });
 
-// Enhanced fetcher function with offline support
+// Offline-only fetcher function - no API calls
 export const defaultFetcher = async (url: string): Promise<any> => {
-  try {
-    const response = await fetch(url);
-    
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    
-    const data = await response.json();
-    
-    // Cache successful responses for offline access
-    await cacheResponseData(url, data);
-    
-    return data;
-  } catch (error) {
-    // If network fails, try to get cached data
-    if (!navigator.onLine) {
-      const cachedData = await getCachedResponseData(url);
-      if (cachedData) {
-        return cachedData;
-      }
-    }
-    throw error;
+  // Always get cached data, never make network calls
+  const cachedData = await getCachedResponseData(url);
+  if (cachedData) {
+    return cachedData;
   }
+  
+  // Return default data if no cache exists
+  return getDefaultOfflineData(url);
 };
 
-// Enhanced API request helper function with offline support
+// Offline-only API request helper - no network calls
 export const apiRequest = async (url: string, options?: RequestInit): Promise<any> => {
-  try {
-    const response = await fetch(url, {
-      headers: {
-        'Content-Type': 'application/json',
-        ...options?.headers,
-      },
-      ...options,
+  // For write operations, save to local storage immediately
+  if (options?.method && options.method !== 'GET') {
+    const data = options.body ? JSON.parse(options.body as string) : undefined;
+    
+    // Store action locally and return success
+    await offlineStorage.queueOfflineAction({
+      endpoint: url,
+      method: options.method as 'POST' | 'PUT' | 'PATCH' | 'DELETE',
+      data,
+      type: getActionType(options.method),
+      headers: options.headers as Record<string, string>
     });
     
-    if (!response.ok) {
-      const error = await response.json().catch(() => ({ error: 'Network error' }));
-      throw new Error(error.error || `HTTP error! status: ${response.status}`);
-    }
+    // Simulate immediate success for local operations
+    await simulateLocalOperation(url, options.method, data);
     
-    const data = await response.json();
-    
-    // Cache successful responses
-    await cacheResponseData(url, data);
-    
-    return data;
-  } catch (error) {
-    // If offline and it's a write operation, queue it
-    if (!navigator.onLine && options?.method && options.method !== 'GET') {
-      await offlineStorage.queueOfflineAction({
-        endpoint: url,
-        method: options.method as 'POST' | 'PUT' | 'PATCH' | 'DELETE',
-        data: options.body ? JSON.parse(options.body as string) : undefined,
-        type: getActionType(options.method),
-        headers: options.headers as Record<string, string>
-      });
-      
-      // Return a success response to prevent UI errors
-      return { success: true, offline: true, message: 'Action queued for sync when online' };
-    }
-    
-    throw error;
+    return { success: true, offline: true, message: 'Action saved locally' };
   }
+  
+  // For read operations, get cached data
+  return defaultFetcher(url);
 };
 
 // Cache response data based on URL
@@ -128,6 +97,51 @@ async function getCachedResponseData(url: string): Promise<any> {
   } catch (error) {
     console.error('Failed to get cached response data:', error);
     return null;
+  }
+}
+
+// Provide default offline data when no cache exists
+function getDefaultOfflineData(url: string): any {
+  if (url.includes('/api/events')) {
+    return [];
+  } else if (url.includes('/api/rewards')) {
+    return [];
+  } else if (url.includes('/api/reports')) {
+    return [];
+  } else if (url.includes('/api/news')) {
+    return [];
+  } else if (url.includes('/api/users/')) {
+    return null;
+  }
+  return [];
+}
+
+// Simulate local operations for immediate UI feedback
+async function simulateLocalOperation(url: string, method: string, data: any): Promise<void> {
+  try {
+    if (method === 'POST') {
+      if (url.includes('/api/events') && data) {
+        // Add event to local cache
+        const events = await offlineStorage.getCachedEvents() || [];
+        const newEvent = { ...data, id: Date.now(), createdAt: new Date() };
+        events.push(newEvent);
+        await offlineStorage.cacheEvents(events);
+      } else if (url.includes('/api/reports') && data) {
+        // Add report to local cache
+        const reports = await offlineStorage.getCachedReports() || [];
+        const newReport = { ...data, id: Date.now(), createdAt: new Date(), status: 'pending' };
+        reports.push(newReport);
+        await offlineStorage.cacheReports(reports);
+      } else if (url.includes('/api/rewards') && data) {
+        // Add reward to local cache
+        const rewards = await offlineStorage.getCachedRewards() || [];
+        const newReward = { ...data, id: Date.now(), createdAt: new Date() };
+        rewards.push(newReward);
+        await offlineStorage.cacheRewards(rewards);
+      }
+    }
+  } catch (error) {
+    console.error('Failed to simulate local operation:', error);
   }
 }
 

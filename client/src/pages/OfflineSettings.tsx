@@ -58,56 +58,11 @@ export default function OfflineSettings() {
   };
 
   const downloadMapData = async () => {
-    if (isOffline) {
-      toast({
-        title: "Cannot Download",
-        description: "Map download requires internet connection",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    setIsDownloading(true);
-    setDownloadProgress(0);
-
-    try {
-      toast({
-        title: "Downloading Maps",
-        description: "Caching Baguio City area for offline use..."
-      });
-
-      // Simulate progress updates
-      const progressInterval = setInterval(() => {
-        setDownloadProgress(prev => {
-          if (prev >= 90) {
-            clearInterval(progressInterval);
-            return prev;
-          }
-          return prev + Math.random() * 15;
-        });
-      }, 500);
-
-      await offlineMapManager.initializeBaguioCache();
-      
-      clearInterval(progressInterval);
-      setDownloadProgress(100);
-      
-      await loadCacheStats();
-      
-      toast({
-        title: "Maps Downloaded",
-        description: "Baguio City maps are now available offline"
-      });
-    } catch (error) {
-      toast({
-        title: "Download Failed",
-        description: "Failed to download map data",
-        variant: "destructive"
-      });
-    } finally {
-      setIsDownloading(false);
-      setDownloadProgress(0);
-    }
+    toast({
+      title: "Offline Mode",
+      description: "Running in offline-only mode. Map downloads are disabled.",
+      variant: "destructive"
+    });
   };
 
   const clearAllCache = async () => {

@@ -1,3 +1,4 @@
+// OFFLINE ONLY - NO NETWORK CALLS
 import localforage from 'localforage';
 
 interface TileData {
@@ -143,6 +144,9 @@ class OfflineMapManager {
 }
 
 export const offlineMapManager = new OfflineMapManager();
+
+// Note: This map manager is configured for OFFLINE ONLY mode
+// No network requests will be made - only cached tiles are used
 
 // Barangay San Vicente, Baguio City bounds for caching (16.3954, 120.5968)
 export const BARANGAY_BOUNDS = {
